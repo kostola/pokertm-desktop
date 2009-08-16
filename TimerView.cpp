@@ -95,7 +95,7 @@ TimerView::TimerView()
     txt_playtime->setDefaultTextColor(Qt::white);
     setFontSizeAndCenter(txt_playtime, box_5);
 
-    QGraphicsTextItem *txt_time = scene->addText("01:11:11", QFont(FONT_NAME));
+    txt_time = scene->addText(QTime::currentTime().toString("HH:mm:ss"), QFont(FONT_NAME));
     txt_time->setDefaultTextColor(Qt::white);
     setFontSizeAndCenter(txt_time, box_6);
 
@@ -196,12 +196,32 @@ TimerView::TimerView()
     QObject::connect(pb_minimize, SIGNAL(clicked()), this, SLOT(showMinimized()));
     QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
 
+    QRectF box_timer(SIDEBANDS_WIDTH + MARGIN, MARGIN, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0 * 1.2);
+    QRectF box_blinds(SIDEBANDS_WIDTH + MARGIN, box_timer.bottom(), SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0);
+
+    QGraphicsTextItem *txt_timer = scene->addText("88:88", QFont(FONT_NAME));
+    txt_timer->setDefaultTextColor(Qt::white);
+    setFontSizeAndCenter(txt_timer, box_timer);
+
+    QGraphicsTextItem *txt_blinds = scene->addText("2000 / 4000\nAnte 200", QFont(FONT_NAME));
+    txt_blinds->setDefaultTextColor(Qt::white);
+    setFontSizeAndCenter(txt_blinds, box_blinds);
+
     this->setScene(scene);
     this->setSceneRect(0.0, 0.0, SCREEN_WIDTH, SCREEN_HEIGHT);
     this->setWindowTitle("PokerTimer - Torneo");
+
+    QTimer *time_timer = new QTimer(this);
+    QObject::connect(time_timer, SIGNAL(timeout()), this, SLOT(updateCurrentTime()));
+    time_timer->start(1000);
 }
 
 void TimerView::slotto()
 {
     qDebug() << "PLAY CLICKED";
+}
+
+void TimerView::updateCurrentTime()
+{
+    txt_time->setPlainText(QTime::currentTime().toString("HH:mm:ss"));
 }

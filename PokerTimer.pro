@@ -5,9 +5,11 @@ TARGET = PokerTimer
 TEMPLATE = app
 SOURCES += main.cpp \
     MainWindow.cpp \
-    TimerView.cpp
+    TimerView.cpp \
+    Tournament.cpp
 HEADERS += MainWindow.h \
-    TimerView.h
+    TimerView.h \
+    Tournament.h
 OBJECTS_DIR = .obj
 MOC_DIR = .obj
 RCC_DIR = .obj

@@ -1,7 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
+#include <QTableWidget>
 
 class MainWindow : public QMainWindow
 {
@@ -11,7 +12,12 @@ class MainWindow : public QMainWindow
         MainWindow(QWidget *parent = 0);
         ~MainWindow();
 
+    private:
+        QTableWidget *table_levels;
+
     private slots:
+        void addLevelClicked();
+        void remLevelClicked();
         void startClicked();
 };
 

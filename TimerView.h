@@ -4,15 +4,21 @@
 #include <QGraphicsView>
 #include <QObject>
 
+#include "Tournament.h"
+
 class TimerView : public QGraphicsView
 {
     Q_OBJECT
 
     public:
-        TimerView();
+        TimerView(Tournament *t);
+
+    private:
+        class QGraphicsTextItem *txt_time;
 
     private slots:
         void slotto();
+        void updateCurrentTime();
 };
 
 #endif // TIMERVIEW_H
