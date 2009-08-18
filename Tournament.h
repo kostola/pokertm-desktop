@@ -28,6 +28,7 @@ class Tournament : public QObject
         int getTotalChips();
         int getTotalPlayers();
         void playerOut();
+        void rebuy(int currentLevel);
         void setChipsEach(int c);
         void setCurrentPlayers(int cp);
         void setName(const QString& n);

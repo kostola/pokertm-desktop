@@ -150,10 +150,66 @@ void MainWindow::exitTriggered()
 
 void MainWindow::newTriggered()
 {
+    if(QMessageBox::question(this, "Nuovo Torneo", "Vuoi salvare il torneo attuale prima di cancellarlo?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+        saveAsTriggered();
+    }
+
+    m_txt_name->clear();
+    m_table_levels->clearContents();
+    m_table_levels->setRowCount(0);
+    m_sbox_chips->setValue(0);
+    m_sbox_ngiocatori->setValue(0);
+    m_sbox_rebuychips->setValue(0);
+    m_sbox_rebuylev->setValue(0);
 }
 
 void MainWindow::openTriggered()
 {
+    newTriggered();
+
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Apri"), QDir::homePath(), tr("Poker Tournament (*.pkt)"));
+    if(fileName.isNull())
+        return;
+
+    QFile file(fileName);
+    if(! (file.exists() && file.open(QIODevice::ReadOnly))) {
+        qDebug() << "Wrong file!";
+        return;
+    }
+
+    QDomDocument doc("xml-pokertimer");
+    doc.setContent(&file);
+
+    QDomNode node_tournament = doc.childNodes().at(0);
+    m_txt_name->setText(node_tournament.attributes().namedItem("name").nodeValue());
+
+    QDomNode node_levels = node_tournament.childNodes().at(0);
+    for(int i = 0; i < node_levels.childNodes().size(); i++) {
+        QDomNode node_lev = node_levels.childNodes().at(i);
+        m_table_levels->setRowCount(i+1);
+
+        m_table_levels->setItem(i, 0, new QTableWidgetItem(""));
+        m_table_levels->setItem(i, 1, new QTableWidgetItem(""));
+        m_table_levels->setItem(i, 2, new QTableWidgetItem(""));
+        m_table_levels->setItem(i, 3, new QTableWidgetItem(""));
+
+        m_table_levels->item(i, 0)->setText(node_lev.attributes().namedItem("time").nodeValue());
+        m_table_levels->item(i, 1)->setText(node_lev.attributes().namedItem("ante").nodeValue());
+        m_table_levels->item(i, 2)->setText(node_lev.attributes().namedItem("smallblind").nodeValue());
+        m_table_levels->item(i, 3)->setText(node_lev.attributes().namedItem("bigblind").nodeValue());
+
+        //qDebug() << node_lev.attributes().namedItem("time").nodeValue() << node_lev.attributes().namedItem("ante").nodeValue() << node_lev.attributes().namedItem("smallblind").nodeValue() << node_lev.attributes().namedItem("bigblind").nodeValue();
+    }
+
+    QDomNode node_players = node_tournament.childNodes().at(1);
+    m_sbox_ngiocatori->setValue(QVariant(node_players.attributes().namedItem("number").nodeValue()).toInt());
+    m_sbox_chips->setValue(QVariant(node_players.attributes().namedItem("chipseach").nodeValue()).toInt());
+
+    QDomNode node_rebuy = node_tournament.childNodes().at(2);
+    m_sbox_rebuylev->setValue(QVariant(node_rebuy.attributes().namedItem("maxlevel").nodeValue()).toInt());
+    m_sbox_rebuychips->setValue(QVariant(node_rebuy.attributes().namedItem("chips").nodeValue()).toInt());
+
+    //qDebug() << doc.toString();
 }
 
 void MainWindow::remLevelClicked()

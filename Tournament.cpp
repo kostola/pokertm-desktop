@@ -5,6 +5,12 @@
 Tournament::Tournament(QObject *parent)
     : QObject(parent)
 {
+    m_chips_each = 0;
+    m_current_players = 0;
+    m_rebuy_maxlevel = 0;
+    m_rebuy_chips = 0;
+    m_rebuys = 0;
+    m_total_players = 0;
 }
 
 void Tournament::addLevel(Level l)
@@ -29,7 +35,7 @@ int Tournament::getCurrentPlayers()
 
 Tournament::Level Tournament::getLevel(int number)
 {
-    qDebug() << this->toString();
+    //qDebug() << this->toString();
 
     if(number < 0 || getLevels() == 0)
         return Level();
@@ -71,6 +77,15 @@ void Tournament::playerOut()
 {
     if(m_current_players > 1)
         m_current_players--;
+}
+
+void Tournament::rebuy(int currentLevel)
+{
+    if(currentLevel >= m_rebuy_maxlevel || m_current_players == m_total_players)
+        return;
+
+    m_current_players++;
+    m_rebuys++;
 }
 
 void Tournament::setChipsEach(int c)

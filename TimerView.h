@@ -55,8 +55,11 @@ class TimerView : public QGraphicsView
         QGraphicsTextItem *m_txt_next_ante;
 
     private slots:
+        void nextClicked();
         void playClicked();
         void playerOutClicked();
+        void prevClicked();
+        void rebuyClicked();
         void tournamentTimerTimeout();
         void updateAverageStack();
         void updateCurrentTime();

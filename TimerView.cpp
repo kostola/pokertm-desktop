@@ -183,13 +183,16 @@ TimerView::TimerView(Tournament *t)
     QGraphicsWidget *buttons_item = new QGraphicsWidget();
     buttons_item->setLayout(lay_buttons);
 
-    qDebug() << buttons_item->boundingRect();
+    //qDebug() << buttons_item->boundingRect();
 
     scene->addItem(buttons_item);
     buttons_item->setPos(SIDEBANDS_WIDTH, SCREEN_HEIGHT - button_size - 3.0 * MARGIN);
 
     QObject::connect(pb_play, SIGNAL(clicked()), this, SLOT(playClicked()));
+    QObject::connect(pb_prev, SIGNAL(clicked()), this, SLOT(prevClicked()));
+    QObject::connect(pb_next, SIGNAL(clicked()), this, SLOT(nextClicked()));
     QObject::connect(pb_playerout, SIGNAL(clicked()), this, SLOT(playerOutClicked()));
+    QObject::connect(pb_rebuy, SIGNAL(clicked()), this, SLOT(rebuyClicked()));
     QObject::connect(pb_minimize, SIGNAL(clicked()), this, SLOT(showMinimized()));
     QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
 
@@ -238,10 +241,20 @@ TimerView::TimerView(Tournament *t)
     QObject::connect(m_tournament_timer, SIGNAL(timeout()), this, SLOT(tournamentTimerTimeout()));
 }
 
+void TimerView::nextClicked()
+{
+    m_current_level++;
+    updateLevels();
+    m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+    updatePlayTimes();
+    if(! m_paused)
+        m_tournament_timer->start(1000);
+}
+
 void TimerView::playClicked()
 {
     if(m_paused) {
-        qDebug() << "PLAY CLICKED PAUSED";
+        //qDebug() << "PLAY CLICKED PAUSED";
         if(m_txt_starttime->toPlainText() == "00:00:00" && m_play_time.toString("HH:mm:ss") == "00:00:00") {
             m_txt_starttime->setPlainText(QTime::currentTime().toString("HH:mm:ss"));
         }
@@ -251,7 +264,7 @@ void TimerView::playClicked()
         m_paused = false;
     }
     else {
-        qDebug() << "PLAY CLICKED NOT PAUSED";
+        //qDebug() << "PLAY CLICKED NOT PAUSED";
         m_paused = true;
         m_tournament_timer->stop();
         m_txt_timer->setDefaultTextColor(Qt::red);
@@ -262,6 +275,27 @@ void TimerView::playClicked()
 void TimerView::playerOutClicked()
 {
     m_tournament->playerOut();
+    updatePlayers();
+    updateAverageStack();
+    updateTotalChips();
+}
+
+void TimerView::prevClicked()
+{
+    if(m_current_level == 0)
+        return;
+
+    m_current_level--;
+    updateLevels();
+    m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+    updatePlayTimes();
+    if(! m_paused)
+        m_tournament_timer->start(1000);
+}
+
+void TimerView::rebuyClicked()
+{
+    m_tournament->rebuy(m_current_level);
     updatePlayers();
     updateAverageStack();
     updateTotalChips();
@@ -280,7 +314,7 @@ void TimerView::tournamentTimerTimeout()
 
     m_play_time = m_play_time.addSecs(1);
     updatePlayTimes();
-    qDebug() << m_level_time << m_play_time;
+    //qDebug() << m_level_time << m_play_time;
 }
 
 void TimerView::updateAverageStack()
