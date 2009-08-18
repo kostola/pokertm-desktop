@@ -9,6 +9,20 @@
 #define SIDEBANDS_WIDTH 300.0
 #define TITLE_FONT QFont(FONT_NAME, 28)
 
+QString addNumberPoints(const QString& n)
+{
+    QString num;
+    int counter = 0;
+    for(int i = n.size() - 1; i >= 0; i--) {
+        if(counter > 0 && counter % 3 == 0)
+            num.prepend(".");
+        num.prepend(n.mid(i,1));
+        counter++;
+    }
+
+    return num;
+}
+
 qreal calcHCenter(QGraphicsItem *item, qreal lbound, qreal rbound)
 {
     return lbound + (rbound - lbound - item->boundingRect().width()) / 2.0;
@@ -32,18 +46,21 @@ void setFontSizeAndCenter(QGraphicsTextItem *item, const QRectF &rect)
     item->setPos(calcHCenter(item, rect.left(), rect.right()), calcVCenter(item, rect.top(), rect.bottom()));
 }
 
-TimerView::TimerView()
+TimerView::TimerView(Tournament *t)
+    : m_tournament(t)
+    , m_paused(true)
+    , m_current_level(0)
 {
     QGraphicsScene *scene = new QGraphicsScene();
     scene->setBackgroundBrush(QBrush(Qt::black));
 
     QPen pen_white(QBrush(Qt::white), 3.0);
-    QGraphicsLineItem *l_v1 = scene->addLine(SIDEBANDS_WIDTH, 0.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT, pen_white);
-    QGraphicsLineItem *l_v2 = scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, 0.0, SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT, pen_white);
-    QGraphicsLineItem *l_h1 = scene->addLine(0.0, SCREEN_HEIGHT / 3.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0, pen_white);
-    QGraphicsLineItem *l_h2 = scene->addLine(0.0, SCREEN_HEIGHT / 3.0 * 2.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, pen_white);
-    QGraphicsLineItem *l_h3 = scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0, SCREEN_WIDTH, SCREEN_HEIGHT / 3.0, pen_white);
-    QGraphicsLineItem *l_h4 = scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, SCREEN_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, pen_white);
+    /*QGraphicsLineItem *l_v1 = */scene->addLine(SIDEBANDS_WIDTH, 0.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT, pen_white);
+    /*QGraphicsLineItem *l_v2 = */scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, 0.0, SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT, pen_white);
+    /*QGraphicsLineItem *l_h1 = */scene->addLine(0.0, SCREEN_HEIGHT / 3.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0, pen_white);
+    /*QGraphicsLineItem *l_h2 = */scene->addLine(0.0, SCREEN_HEIGHT / 3.0 * 2.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, pen_white);
+    /*QGraphicsLineItem *l_h3 = */scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0, SCREEN_WIDTH, SCREEN_HEIGHT / 3.0, pen_white);
+    /*QGraphicsLineItem *l_h4 = */scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, SCREEN_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, pen_white);
 
     QGraphicsTextItem *txt_1 = scene->addText(tr("Giocatori"), TITLE_FONT);
     txt_1->setDefaultTextColor(Qt::white);
@@ -68,39 +85,38 @@ TimerView::TimerView()
     qreal sidebands_box_w = SIDEBANDS_WIDTH - 2.0 * MARGIN;
     qreal sidebands_box_h = SCREEN_HEIGHT / 3.0 - txt_1->boundingRect().height() - 2.0 * MARGIN;
 
-    QRectF box_1(MARGIN, txt_1->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    QRectF box_2(MARGIN, SCREEN_HEIGHT / 3.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    QRectF box_3(MARGIN, SCREEN_HEIGHT / 3.0 * 2.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    QRectF box_4(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, txt_1->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    QRectF box_5(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, SCREEN_HEIGHT / 3.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    QRectF box_6(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, SCREEN_HEIGHT / 3.0 * 2.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_1 = QRectF(MARGIN, txt_1->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_2 = QRectF(MARGIN, SCREEN_HEIGHT / 3.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_3 = QRectF(MARGIN, SCREEN_HEIGHT / 3.0 * 2.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_4 = QRectF(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, txt_1->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_5 = QRectF(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, SCREEN_HEIGHT / 3.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_6 = QRectF(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, SCREEN_HEIGHT / 3.0 * 2.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
 
-    QGraphicsTextItem *txt_players = scene->addText("88/88", QFont(FONT_NAME));
-    txt_players->setDefaultTextColor(Qt::white);
-    setFontSizeAndCenter(txt_players, box_1);
+    m_txt_players = scene->addText("", QFont(FONT_NAME));
+    m_txt_players->setDefaultTextColor(Qt::white);
+    updatePlayers();
 
-    QGraphicsTextItem *txt_avgstack = scene->addText("5.000", QFont(FONT_NAME));
-    txt_avgstack->setDefaultTextColor(Qt::white);
-    setFontSizeAndCenter(txt_avgstack, box_2);
+    m_txt_avgstack = scene->addText("", QFont(FONT_NAME));
+    m_txt_avgstack->setDefaultTextColor(Qt::white);
+    updateAverageStack();
 
-    QGraphicsTextItem *txt_totchips = scene->addText("40.000", QFont(FONT_NAME));
-    txt_totchips->setDefaultTextColor(Qt::white);
-    setFontSizeAndCenter(txt_totchips, box_3);
+    m_txt_totchips = scene->addText("", QFont(FONT_NAME));
+    m_txt_totchips->setDefaultTextColor(Qt::white);
+    updateTotalChips();
 
-    QGraphicsTextItem *txt_starttime = scene->addText("01:00:21", QFont(FONT_NAME));
-    txt_starttime->setDefaultTextColor(Qt::white);
-    setFontSizeAndCenter(txt_starttime, box_4);
+    m_txt_starttime = scene->addText("01:00:21", QFont(FONT_NAME));
+    m_txt_starttime->setDefaultTextColor(Qt::white);
+    setFontSizeAndCenter(m_txt_starttime, box_4);
 
-    QGraphicsTextItem *txt_playtime = scene->addText("00:10:50", QFont(FONT_NAME));
-    txt_playtime->setDefaultTextColor(Qt::white);
-    setFontSizeAndCenter(txt_playtime, box_5);
+    m_txt_playtime = scene->addText("00:10:50", QFont(FONT_NAME));
+    m_txt_playtime->setDefaultTextColor(Qt::white);
+    setFontSizeAndCenter(m_txt_playtime, box_5);
 
-    txt_time = scene->addText(QTime::currentTime().toString("HH:mm:ss"), QFont(FONT_NAME));
-    txt_time->setDefaultTextColor(Qt::white);
-    setFontSizeAndCenter(txt_time, box_6);
+    m_txt_time = scene->addText(QTime::currentTime().toString("HH:mm:ss"), QFont(FONT_NAME));
+    m_txt_time->setDefaultTextColor(Qt::white);
+    setFontSizeAndCenter(m_txt_time, box_6);
 
     int button_size = (int) ((SCREEN_WIDTH - 2.0 * SIDEBANDS_WIDTH - 3.0 * MARGIN) / 7.0 - MARGIN);
-    int pbcounter = 0;
 
     QGraphicsLinearLayout *lay_buttons = new QGraphicsLinearLayout(Qt::Horizontal);
 
@@ -109,20 +125,12 @@ TimerView::TimerView()
     pal.setColor(QPalette::Window, Qt::darkGray);
     pal.setColor(QPalette::Button, QColor(0x20,0x20,0x20));
     pal.setColor(QPalette::ButtonText, Qt::white);
-    /*pal.setColor(QPalette::Light, Qt::black);
-    pal.setColor(QPalette::Midlight, Qt::black);
-    pal.setColor(QPalette::Dark, Qt::black);
-    pal.setColor(QPalette::Mid, Qt::black);
-    pal.setColor(QPalette::Shadow, Qt::black);
-    */
     pb_play->setPalette(pal);
     pb_play->setFlat(true);
     pb_play->setStyleSheet("border: 0px;");
     pb_play->setFixedSize(button_size, button_size);
     QGraphicsProxyWidget *pb_play_item = scene->addWidget(pb_play);
     lay_buttons->addItem(pb_play_item);
-    //pb_play_item->setPos(SIDEBANDS_WIDTH + MARGIN * (pbcounter + 1) + button_size * pbcounter, 200.0);
-    //pbcounter++;
 
     QPushButton *pb_prev = new QPushButton("Prev");
     pb_prev->setPalette(pal);
@@ -131,8 +139,6 @@ TimerView::TimerView()
     pb_prev->setFixedSize(button_size, button_size);
     QGraphicsProxyWidget *pb_prev_item = scene->addWidget(pb_prev);
     lay_buttons->addItem(pb_prev_item);
-    //pb_prev_item->setPos(SIDEBANDS_WIDTH + MARGIN * (pbcounter + 1) + button_size * pbcounter, 200.0);
-    //pbcounter++;
 
     QPushButton *pb_next = new QPushButton("Next");
     pb_next->setPalette(pal);
@@ -141,8 +147,6 @@ TimerView::TimerView()
     pb_next->setFixedSize(button_size, button_size);
     QGraphicsProxyWidget *pb_next_item = scene->addWidget(pb_next);
     lay_buttons->addItem(pb_next_item);
-    //pb_next_item->setPos(SIDEBANDS_WIDTH + MARGIN * (pbcounter + 1) + button_size * pbcounter, 200.0);
-    //pbcounter++;
 
     QPushButton *pb_playerout = new QPushButton("Pl. Out");
     pb_playerout->setPalette(pal);
@@ -151,8 +155,6 @@ TimerView::TimerView()
     pb_playerout->setFixedSize(button_size, button_size);
     QGraphicsProxyWidget *pb_playerout_item = scene->addWidget(pb_playerout);
     lay_buttons->addItem(pb_playerout_item);
-    //pb_playerout_item->setPos(SIDEBANDS_WIDTH + MARGIN * (pbcounter + 1) + button_size * pbcounter, 200.0);
-    //pbcounter++;
 
     QPushButton *pb_rebuy = new QPushButton("Rebuy");
     pb_rebuy->setPalette(pal);
@@ -161,8 +163,6 @@ TimerView::TimerView()
     pb_rebuy->setFixedSize(button_size, button_size);
     QGraphicsProxyWidget *pb_rebuy_item = scene->addWidget(pb_rebuy);
     lay_buttons->addItem(pb_rebuy_item);
-    //pb_rebuy_item->setPos(SIDEBANDS_WIDTH + MARGIN * (pbcounter + 1) + button_size * pbcounter, 200.0);
-    //pbcounter++;
 
     QPushButton *pb_minimize = new QPushButton("Minimize");
     pb_minimize->setPalette(pal);
@@ -171,8 +171,6 @@ TimerView::TimerView()
     pb_minimize->setFixedSize(button_size, button_size);
     QGraphicsProxyWidget *pb_minimize_item = scene->addWidget(pb_minimize);
     lay_buttons->addItem(pb_minimize_item);
-    //pb_minimize_item->setPos(SIDEBANDS_WIDTH + MARGIN * (pbcounter + 1) + button_size * pbcounter, 200.0);
-    //pbcounter++;
 
     QPushButton *pb_close = new QPushButton("Close");
     pb_close->setPalette(pal);
@@ -181,8 +179,6 @@ TimerView::TimerView()
     pb_close->setFixedSize(button_size, button_size);
     QGraphicsProxyWidget *pb_close_item = scene->addWidget(pb_close);
     lay_buttons->addItem(pb_close_item);
-    //pb_close_item->setPos(SIDEBANDS_WIDTH + MARGIN * (pbcounter + 1) + button_size * pbcounter, 200.0);
-    //pbcounter++;
 
     QGraphicsWidget *buttons_item = new QGraphicsWidget();
     buttons_item->setLayout(lay_buttons);
@@ -196,12 +192,15 @@ TimerView::TimerView()
     QObject::connect(pb_minimize, SIGNAL(clicked()), this, SLOT(showMinimized()));
     QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
 
-    QRectF box_timer(SIDEBANDS_WIDTH + MARGIN, MARGIN, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0 * 1.2);
-    QRectF box_blinds(SIDEBANDS_WIDTH + MARGIN, box_timer.bottom(), SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0);
+    box_timer  = QRectF(SIDEBANDS_WIDTH + MARGIN, MARGIN, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0 * 1.2);
+    box_blinds = QRectF(SIDEBANDS_WIDTH + MARGIN, box_timer.bottom(), SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0);
 
-    QGraphicsTextItem *txt_timer = scene->addText("88:88", QFont(FONT_NAME));
-    txt_timer->setDefaultTextColor(Qt::white);
-    setFontSizeAndCenter(txt_timer, box_timer);
+    m_txt_timer = scene->addText("88:88", QFont(FONT_NAME));
+    m_txt_timer->setDefaultTextColor(Qt::red);
+    setFontSizeAndCenter(m_txt_timer, box_timer);
+
+    m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+    m_txt_timer->setPlainText(m_level_time.toString("mm:ss"));
 
     QGraphicsTextItem *txt_blinds = scene->addText("2000 / 4000\nAnte 200", QFont(FONT_NAME));
     txt_blinds->setDefaultTextColor(Qt::white);
@@ -221,7 +220,29 @@ void TimerView::slotto()
     qDebug() << "PLAY CLICKED";
 }
 
+void TimerView::updateAverageStack()
+{
+    m_txt_avgstack->setPlainText(addNumberPoints(QString::number(m_tournament->getAverageStack())));
+    setFontSizeAndCenter(m_txt_avgstack, box_2);
+}
+
 void TimerView::updateCurrentTime()
 {
-    txt_time->setPlainText(QTime::currentTime().toString("HH:mm:ss"));
+    m_txt_time->setPlainText(QTime::currentTime().toString("HH:mm:ss"));
+}
+
+void TimerView::updatePlayers()
+{
+    m_txt_players->setPlainText(QString("%1/%2").arg(m_tournament->getCurrentPlayers()).arg(m_tournament->getTotalPlayers()));
+    setFontSizeAndCenter(m_txt_players, box_1);
+}
+
+void TimerView::updatePlayTimes()
+{
+}
+
+void TimerView::updateTotalChips()
+{
+    m_txt_totchips->setPlainText(addNumberPoints(QString::number(m_tournament->getTotalChips())));
+    setFontSizeAndCenter(m_txt_totchips, box_3);
 }

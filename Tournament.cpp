@@ -1,5 +1,7 @@
 #include "Tournament.h"
 
+#include <QDebug>
+
 Tournament::Tournament(QObject *parent)
     : QObject(parent)
 {
@@ -10,13 +12,25 @@ void Tournament::addLevel(Level l)
     m_levels.append(l);
 }
 
+int Tournament::getAverageStack()
+{
+    return getTotalChips() / m_current_players;
+}
+
 int Tournament::getChipsEach()
 {
     return m_chips_each;
 }
 
+int Tournament::getCurrentPlayers()
+{
+    return m_current_players;
+}
+
 Tournament::Level Tournament::getLevel(int number)
 {
+    qDebug() << this->toString();
+
     if(number >= getLevels())
         return Level();
 
@@ -43,14 +57,24 @@ int Tournament::getRebuyMaxLevel()
     return m_rebuy_maxlevel;
 }
 
+int Tournament::getTotalChips()
+{
+    return m_total_players * m_chips_each + m_rebuys * m_rebuy_chips;
+}
+
 int Tournament::getTotalPlayers()
 {
-    return m_players;
+    return m_total_players;
 }
 
 void Tournament::setChipsEach(int c)
 {
     m_chips_each = c;
+}
+
+void Tournament::setCurrentPlayers(int cp)
+{
+    m_current_players = cp;
 }
 
 void Tournament::setName(const QString& n)
@@ -60,7 +84,7 @@ void Tournament::setName(const QString& n)
 
 void Tournament::setTotalPlayers(int tp)
 {
-    m_players = tp;
+    m_total_players = tp;
 }
 
 void Tournament::setRebuyChips(int c)
@@ -71,4 +95,13 @@ void Tournament::setRebuyChips(int c)
 void Tournament::setRebuyMaxLevel(int l)
 {
     m_rebuy_maxlevel = l;
+}
+
+QString Tournament::toString()
+{
+    QString str;
+    foreach(Level l, m_levels) {
+        str.append(QString("[Tempo:%1, Ante:%2, SB:%3, BB:%4] ").arg(l.time_minutes).arg(l.ante).arg(l.smallblind).arg(l.bigblind));
+    }
+    return str;
 }

@@ -1,7 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QLineEdit>
 #include <QMainWindow>
+#include <QSpinBox>
 #include <QTableWidget>
 
 class MainWindow : public QMainWindow
@@ -13,7 +15,12 @@ class MainWindow : public QMainWindow
         ~MainWindow();
 
     private:
-        QTableWidget *table_levels;
+        QSpinBox *m_sbox_chips;
+        QSpinBox *m_sbox_ngiocatori;
+        QSpinBox *m_sbox_rebuychips;
+        QSpinBox *m_sbox_rebuylev;
+        QTableWidget *m_table_levels;
+        QLineEdit *m_txt_name;
 
     private slots:
         void addLevelClicked();
