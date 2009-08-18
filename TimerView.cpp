@@ -104,11 +104,11 @@ TimerView::TimerView(Tournament *t)
     m_txt_totchips->setDefaultTextColor(Qt::white);
     updateTotalChips();
 
-    m_txt_starttime = scene->addText("01:00:21", QFont(FONT_NAME));
+    m_txt_starttime = scene->addText("00:00:00", QFont(FONT_NAME));
     m_txt_starttime->setDefaultTextColor(Qt::white);
     setFontSizeAndCenter(m_txt_starttime, box_4);
 
-    m_txt_playtime = scene->addText("00:10:50", QFont(FONT_NAME));
+    m_txt_playtime = scene->addText("00:00:00", QFont(FONT_NAME));
     m_txt_playtime->setDefaultTextColor(Qt::white);
     setFontSizeAndCenter(m_txt_playtime, box_5);
 
@@ -188,23 +188,43 @@ TimerView::TimerView(Tournament *t)
     scene->addItem(buttons_item);
     buttons_item->setPos(SIDEBANDS_WIDTH, SCREEN_HEIGHT - button_size - 3.0 * MARGIN);
 
-    QObject::connect(pb_play, SIGNAL(clicked()), this, SLOT(slotto()));
+    QObject::connect(pb_play, SIGNAL(clicked()), this, SLOT(playClicked()));
+    QObject::connect(pb_playerout, SIGNAL(clicked()), this, SLOT(playerOutClicked()));
     QObject::connect(pb_minimize, SIGNAL(clicked()), this, SLOT(showMinimized()));
     QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
 
-    box_timer  = QRectF(SIDEBANDS_WIDTH + MARGIN, MARGIN, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0 * 1.2);
-    box_blinds = QRectF(SIDEBANDS_WIDTH + MARGIN, box_timer.bottom(), SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0);
+    box_name        = QRectF(SIDEBANDS_WIDTH + MARGIN, 0.0, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), 85.0);
+    box_timer       = QRectF(SIDEBANDS_WIDTH + MARGIN, box_name.bottom() * 0.8, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0);
+    box_blinds      = QRectF(SIDEBANDS_WIDTH + MARGIN, box_timer.bottom() * 0.9, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 4.0);
+    box_ante        = QRectF(SIDEBANDS_WIDTH + MARGIN, box_blinds.top() + box_blinds.height() * 0.85, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 2.5);
+    box_next_blinds = QRectF(SIDEBANDS_WIDTH + MARGIN, box_ante.bottom(), SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 2.0);
+    box_next_ante   = QRectF(SIDEBANDS_WIDTH + MARGIN, box_next_blinds.top() + box_next_blinds.height() * 0.85, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 1.5);
+
+    m_txt_name = scene->addText(m_tournament->getName(), QFont(FONT_NAME));
+    m_txt_name->setDefaultTextColor(Qt::white);
+    setFontSizeAndCenter(m_txt_name, box_name);
 
     m_txt_timer = scene->addText("88:88", QFont(FONT_NAME));
     m_txt_timer->setDefaultTextColor(Qt::red);
     setFontSizeAndCenter(m_txt_timer, box_timer);
 
     m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+    m_play_time = QTime(0,0,0,0);
     m_txt_timer->setPlainText(m_level_time.toString("mm:ss"));
 
-    QGraphicsTextItem *txt_blinds = scene->addText("2000 / 4000\nAnte 200", QFont(FONT_NAME));
-    txt_blinds->setDefaultTextColor(Qt::white);
-    setFontSizeAndCenter(txt_blinds, box_blinds);
+    m_txt_blinds = scene->addText("", QFont(FONT_NAME));
+    m_txt_blinds->setDefaultTextColor(Qt::white);
+
+    m_txt_ante = scene->addText("", QFont(FONT_NAME));
+    m_txt_ante->setDefaultTextColor(Qt::white);
+
+    m_txt_next_blinds = scene->addText("400 / 800", QFont(FONT_NAME));
+    m_txt_next_blinds->setDefaultTextColor(Qt::white);
+
+    m_txt_next_ante = scene->addText("Ante: 200", QFont(FONT_NAME));
+    m_txt_next_ante->setDefaultTextColor(Qt::white);
+
+    updateLevels();
 
     this->setScene(scene);
     this->setSceneRect(0.0, 0.0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -213,11 +233,54 @@ TimerView::TimerView(Tournament *t)
     QTimer *time_timer = new QTimer(this);
     QObject::connect(time_timer, SIGNAL(timeout()), this, SLOT(updateCurrentTime()));
     time_timer->start(1000);
+
+    m_tournament_timer = new QTimer(this);
+    QObject::connect(m_tournament_timer, SIGNAL(timeout()), this, SLOT(tournamentTimerTimeout()));
 }
 
-void TimerView::slotto()
+void TimerView::playClicked()
 {
-    qDebug() << "PLAY CLICKED";
+    if(m_paused) {
+        qDebug() << "PLAY CLICKED PAUSED";
+        if(m_txt_starttime->toPlainText() == "00:00:00" && m_play_time.toString("HH:mm:ss") == "00:00:00") {
+            m_txt_starttime->setPlainText(QTime::currentTime().toString("HH:mm:ss"));
+        }
+
+        m_txt_timer->setDefaultTextColor(Qt::white);
+        m_tournament_timer->start(1000);
+        m_paused = false;
+    }
+    else {
+        qDebug() << "PLAY CLICKED NOT PAUSED";
+        m_paused = true;
+        m_tournament_timer->stop();
+        m_txt_timer->setDefaultTextColor(Qt::red);
+        m_txt_timer->update(m_txt_timer->boundingRect());
+    }
+}
+
+void TimerView::playerOutClicked()
+{
+    m_tournament->playerOut();
+    updatePlayers();
+    updateAverageStack();
+    updateTotalChips();
+}
+
+void TimerView::tournamentTimerTimeout()
+{
+    m_level_time = m_level_time.addSecs(-1);
+
+    if(m_level_time.toString("mm:ss") == "00:00") {
+        // cambio livello
+        m_current_level++;
+        updateLevels();
+        m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+    }
+
+    m_play_time = m_play_time.addSecs(1);
+    updatePlayTimes();
+    qDebug() << m_level_time << m_play_time;
 }
 
 void TimerView::updateAverageStack()
@@ -231,6 +294,21 @@ void TimerView::updateCurrentTime()
     m_txt_time->setPlainText(QTime::currentTime().toString("HH:mm:ss"));
 }
 
+void TimerView::updateLevels()
+{
+    m_txt_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->getLevel(m_current_level).smallblind).arg(m_tournament->getLevel(m_current_level).bigblind));
+    setFontSizeAndCenter(m_txt_blinds, box_blinds);
+
+    m_txt_ante->setPlainText(QString("Ante: %1").arg(m_tournament->getLevel(m_current_level).ante));
+    setFontSizeAndCenter(m_txt_ante, box_ante);
+
+    m_txt_next_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->getLevel(m_current_level + 1).smallblind).arg(m_tournament->getLevel(m_current_level + 1).bigblind));
+    setFontSizeAndCenter(m_txt_next_blinds, box_next_blinds);
+
+    m_txt_next_ante->setPlainText(QString("Ante: %1").arg(m_tournament->getLevel(m_current_level + 1).ante));
+    setFontSizeAndCenter(m_txt_next_ante, box_next_ante);
+}
+
 void TimerView::updatePlayers()
 {
     m_txt_players->setPlainText(QString("%1/%2").arg(m_tournament->getCurrentPlayers()).arg(m_tournament->getTotalPlayers()));
@@ -239,6 +317,8 @@ void TimerView::updatePlayers()
 
 void TimerView::updatePlayTimes()
 {
+    m_txt_timer->setPlainText(m_level_time.toString("mm:ss"));
+    m_txt_playtime->setPlainText(m_play_time.toString("HH:mm:ss"));
 }
 
 void TimerView::updateTotalChips()

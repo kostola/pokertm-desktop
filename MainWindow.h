@@ -24,7 +24,12 @@ class MainWindow : public QMainWindow
 
     private slots:
         void addLevelClicked();
+        void exitTriggered();
+        void newTriggered();
+        void openTriggered();
         void remLevelClicked();
+        void saveTriggered();
+        void saveAsTriggered();
         void startClicked();
 };
 

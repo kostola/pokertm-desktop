@@ -31,10 +31,10 @@ Tournament::Level Tournament::getLevel(int number)
 {
     qDebug() << this->toString();
 
-    if(number >= getLevels())
+    if(number < 0 || getLevels() == 0)
         return Level();
 
-    return m_levels.at(number);
+    return m_levels.at(std::min(number, getLevels() - 1));
 }
 
 int Tournament::getLevels()
@@ -65,6 +65,12 @@ int Tournament::getTotalChips()
 int Tournament::getTotalPlayers()
 {
     return m_total_players;
+}
+
+void Tournament::playerOut()
+{
+    if(m_current_players > 1)
+        m_current_players--;
 }
 
 void Tournament::setChipsEach(int c)

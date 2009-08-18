@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 
 #include <QtGui>
+#include <QtXml>
 
 #include "TimerView.h"
 #include "Tournament.h"
@@ -23,6 +24,12 @@ MainWindow::MainWindow(QWidget *parent)
     menu_file->addSeparator();
     QAction *action_exit = menu_file->addAction(tr("&Esci"));
     this->setMenuBar(menu_bar);
+
+    QObject::connect(action_new, SIGNAL(triggered()), this, SLOT(newTriggered()));
+    QObject::connect(action_open, SIGNAL(triggered()), this, SLOT(openTriggered()));
+    QObject::connect(action_save, SIGNAL(triggered()), this, SLOT(saveTriggered()));
+    QObject::connect(action_saveas, SIGNAL(triggered()), this, SLOT(saveAsTriggered()));
+    QObject::connect(action_exit, SIGNAL(triggered()), this, SLOT(exitTriggered()));
 
     // composizione widget centrale
     m_txt_name = new QLineEdit();
@@ -127,13 +134,26 @@ MainWindow::~MainWindow()
 
 void MainWindow::addLevelClicked()
 {
-    qDebug() << m_table_levels->currentRow();
-    if(m_table_levels->currentRow() >= 0) {
-        m_table_levels->insertRow(m_table_levels->currentRow());
+    //qDebug() << m_table_levels->currentRow();
+    if(m_table_levels->currentRow() >= 0 && m_table_levels->currentRow() < m_table_levels->rowCount() - 1) {
+        m_table_levels->insertRow(m_table_levels->currentRow() + 1);
     }
     else {
         m_table_levels->setRowCount(m_table_levels->rowCount() + 1);
     }
+}
+
+void MainWindow::exitTriggered()
+{
+    this->close();
+}
+
+void MainWindow::newTriggered()
+{
+}
+
+void MainWindow::openTriggered()
+{
 }
 
 void MainWindow::remLevelClicked()
@@ -148,10 +168,54 @@ void MainWindow::remLevelClicked()
     }
 }
 
+void MainWindow::saveTriggered()
+{
+    saveAsTriggered();
+}
+
+void MainWindow::saveAsTriggered()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Salva come..."), QDir::homePath(), tr("Poker Tournament (*.pkt)"));
+    if(fileName.isNull())
+        return;
+
+    QDomDocument doc("xml-pokertimer");
+    QDomElement el_tournament = doc.createElement("tournament");
+    el_tournament.setAttribute("name", m_txt_name->text());
+    doc.appendChild(el_tournament);
+
+    QDomElement el_levels = doc.createElement("levels");
+    el_tournament.appendChild(el_levels);
+
+    for(int i = 0; i < m_table_levels->rowCount(); i++) {
+        QDomElement el_lev = doc.createElement("level");
+        el_lev.setAttribute("time", m_table_levels->item(i,0)->text());
+        el_lev.setAttribute("ante", m_table_levels->item(i,1)->text());
+        el_lev.setAttribute("smallblind", m_table_levels->item(i,2)->text());
+        el_lev.setAttribute("bigblind", m_table_levels->item(i,3)->text());
+        el_levels.appendChild(el_lev);
+    }
+
+    QDomElement el_players = doc.createElement("players");
+    el_players.setAttribute("number", QString::number(m_sbox_ngiocatori->value()));
+    el_players.setAttribute("chipseach", QString::number(m_sbox_chips->value()));
+    el_tournament.appendChild(el_players);
+
+    QDomElement el_rebuy = doc.createElement("rebuy");
+    el_rebuy.setAttribute("maxlevel", QString::number(m_sbox_rebuylev->value()));
+    el_rebuy.setAttribute("chips", QString::number(m_sbox_rebuychips->value()));
+    el_tournament.appendChild(el_rebuy);
+
+    QFile file(fileName);
+    file.open(QIODevice::WriteOnly);
+    file.write(doc.toByteArray());
+    file.close();
+}
+
 void MainWindow::startClicked()
 {
-    qDebug() << this->size();
-    if(QMessageBox::question(this, "Inizia Torneo", "Dopo aver iniziato il torneo non potrai più modificare le impostazioni.\nContinuare?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
+    //qDebug() << this->size();
+    if(QMessageBox::question(this, "Inizia Torneo", "Dopo aver iniziato il torneo non potrai piu' modificare le impostazioni.\nContinuare?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
         return;
 
     Tournament *tournament = new Tournament(this);
@@ -170,7 +234,7 @@ void MainWindow::startClicked()
         level.bigblind = QVariant(m_table_levels->item(i,3)->text()).toInt();
         tournament->addLevel(level);
 
-        qDebug() << "Livello" << i << "-" << level.time_minutes << level.ante << level.smallblind << level.bigblind;
+        //qDebug() << "Livello" << i << "-" << level.time_minutes << level.ante << level.smallblind << level.bigblind;
     }
 
     TimerView *tv = new TimerView(tournament);
