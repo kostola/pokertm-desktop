@@ -1,7 +1,7 @@
 # -------------------------------------------------
 # Project created by QtCreator 2009-08-14T15:10:19
 # -------------------------------------------------
-TARGET = PokerTimer
+TARGET = PokerTournamentManager
 QT += xml
 TEMPLATE = app
 SOURCES += main.cpp \
