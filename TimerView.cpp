@@ -1,6 +1,9 @@
 #include "TimerView.h"
 
 #include <QtGui>
+#include <Phonon/AudioOutput>
+#include <Phonon/MediaObject>
+#include <Phonon/Path>
 
 #define FONT_NAME "Helvsetica"
 #define MARGIN 5.0
@@ -310,6 +313,22 @@ void TimerView::tournamentTimerTimeout()
         m_current_level++;
         updateLevels();
         m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+        qDebug() << "PLAY GONG";
+        m_sound_gong = Phonon::createPlayer(Phonon::MusicCategory, Phonon::MediaSource("data/gong.wav"));
+        QObject::connect(m_sound_gong, SIGNAL(finished()), m_sound_gong, SLOT(deleteLater()));
+        m_sound_gong->play();
+    }
+    else if(m_level_time.toString("mm:ss") == "01:00") {
+        qDebug() << "PLAY SCREAM";
+        m_sound_scream = Phonon::createPlayer(Phonon::MusicCategory, Phonon::MediaSource("data/scream.wav"));
+        QObject::connect(m_sound_scream, SIGNAL(finished()), m_sound_scream, SLOT(deleteLater()));
+        m_sound_scream->play();
+    }
+    else if(m_level_time.toString("mm:ss") == "00:01" || m_level_time.toString("mm:ss") == "00:02" || m_level_time.toString("mm:ss") == "00:03") {
+        qDebug() << "PLAY TICK";
+        m_sound_tick = Phonon::createPlayer(Phonon::MusicCategory, Phonon::MediaSource("data/tick.wav"));
+        QObject::connect(m_sound_tick, SIGNAL(finished()), m_sound_tick, SLOT(deleteLater()));
+        m_sound_tick->play();
     }
 
     m_play_time = m_play_time.addSecs(1);
