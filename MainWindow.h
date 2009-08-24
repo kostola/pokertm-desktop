@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QSpinBox>
 #include <QTableWidget>
+#include "ui_MainWindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -12,25 +13,19 @@ class MainWindow : public QMainWindow
 
     public:
         MainWindow(QWidget *parent = 0);
-        ~MainWindow();
 
     private:
-        QSpinBox *m_sbox_chips;
-        QSpinBox *m_sbox_ngiocatori;
-        QSpinBox *m_sbox_rebuychips;
-        QSpinBox *m_sbox_rebuylev;
-        QTableWidget *m_table_levels;
-        QLineEdit *m_txt_name;
+        Ui::MainWindow ui;
 
     private slots:
-        void addLevelClicked();
-        void exitTriggered();
-        void newTriggered();
-        void openTriggered();
-        void remLevelClicked();
-        void saveTriggered();
-        void saveAsTriggered();
-        void startClicked();
+        void on_actionNew_triggered();
+        void on_actionOpen_triggered();
+        void on_actionSave_triggered();
+        void on_actionSaveAs_triggered();
+        void on_addLevel_clicked();
+        void on_remLevel_clicked();
+        void on_startButton_clicked();
+        void validateStart();
 };
 
 #endif // MAINWINDOW_H

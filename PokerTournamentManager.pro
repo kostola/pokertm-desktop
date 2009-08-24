@@ -12,8 +12,9 @@ SOURCES += main.cpp \
 HEADERS += MainWindow.h \
     TimerView.h \
     Tournament.h
+FORMS += MainWindow.ui
 OBJECTS_DIR = .obj
 MOC_DIR = .obj
 RCC_DIR = .obj
 UI_DIR = .obj
-#INCLUDEPATH += /usr/include/KDE
+INCLUDEPATH += /usr/include/KDE
