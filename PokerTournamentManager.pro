@@ -8,7 +8,6 @@ OBJECTS_DIR = .obj
 MOC_DIR = .obj
 RCC_DIR = .obj
 UI_DIR = .obj
-INCLUDEPATH += /usr/include/KDE
 
 # Input files
 HEADERS += MainWindow.h \
@@ -25,11 +24,8 @@ FORMS += MainWindow.ui
 RESOURCES += data.qrc
 
 # windows
-win32 {
-    contains(CONFIG, static) {
-        DEFINES += STATIC_LINK
-        QTPLUGIN += qjpeg
-    }
-} else {
+win32: DEFINES += USE_QSOUND
+else: {
     QT += phonon
+    INCLUDEPATH += /usr/include/KDE
 }

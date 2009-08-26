@@ -317,7 +317,7 @@ void TimerView::rebuyClicked()
 
 #ifdef USE_QSOUND
 #include <QSound>
-#define PLAYSOUND(filename) \
+#define PLAYSOUND(fileName) \
     QSound::play(fileName);
 #else
 #include <Phonon/MediaObject>
