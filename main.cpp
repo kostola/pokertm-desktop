@@ -17,6 +17,11 @@
 
 int main(int argc, char *argv[])
 {
+#if QT_VERSION >= 0x040500
+    // use the Raster GraphicsSystem as default on 4.5+
+    QApplication::setGraphicsSystem("raster");
+#endif
+
     QApplication a(argc, argv);
     a.setApplicationName("PokerTournamentManager");
 

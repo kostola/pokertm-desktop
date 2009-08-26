@@ -25,7 +25,6 @@
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
     public:
         MainWindow(QWidget *parent = 0);
 
@@ -41,6 +40,26 @@ class MainWindow : public QMainWindow
         void on_remLevel_clicked();
         void on_startButton_clicked();
         void validateStart();
+        void startTournament();
+};
+
+class Chip : public QWidget
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity)
+    public:
+        Chip(QWidget * parent);
+
+    public slots:
+        qreal opacity() const;
+        void setOpacity(qreal value);
+
+    protected:
+        void paintEvent(QPaintEvent * /*event*/);
+
+    private:
+        QPixmap m_pix;
+        qreal m_opacity;
 };
 
 #endif // MAINWINDOW_H

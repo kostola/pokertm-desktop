@@ -71,7 +71,7 @@ QPushButton:enabled {
        </size>
       </property>
       <property name="pixmap">
-       <pixmap resource="data.qrc">:/data/data/chip-red.png</pixmap>
+       <pixmap resource="data.qrc">:/data/chip-red.png</pixmap>
       </property>
      </widget>
     </item>

@@ -22,6 +22,36 @@
 #include "TimerView.h"
 #include "Tournament.h"
 
+Chip::Chip(QWidget * parent)
+  : QWidget(parent)
+  , m_opacity(1.0)
+{
+    static QString names[5] = {"black", "blue", "green", "red", "white"};
+    m_pix = QPixmap(":/data/chip-" + names[qrand() % 5] + ".png");
+    setFixedSize(48, 48);
+    show();
+}
+
+qreal Chip::opacity() const
+{
+    return m_opacity;
+}
+
+void Chip::setOpacity(qreal value)
+{
+    m_opacity = value;
+    update();
+}
+
+void Chip::paintEvent(QPaintEvent * /*event*/)
+{
+    QPainter p(this);
+    if (m_opacity < 1.0)
+        p.setOpacity(m_opacity);
+    p.drawPixmap(0, 0, m_pix);
+}
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -172,35 +202,36 @@ void MainWindow::on_remLevel_clicked()
     }
 }
 
+#if QT_VERSION >= 0x040600
+#include <QPropertyAnimation>
+#endif
 void MainWindow::on_startButton_clicked()
 {
-    //qDebug() << this->size();
-    if(QMessageBox::question(this, "Inizia Torneo", "Dopo aver iniziato il torneo non potrai piu' modificare le impostazioni.\nContinuare?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
-        return;
-
-    Tournament *tournament = new Tournament(this);
-    tournament->setName(ui.tourneyName->text());
-    tournament->setCurrentPlayers(ui.spinGiocatori->value());
-    tournament->setTotalPlayers(ui.spinGiocatori->value());
-    tournament->setChipsEach(ui.spinChips->value());
-    tournament->setRebuyMaxLevel(ui.spinRebuyLev->value());
-    tournament->setRebuyChips(ui.spinRebuyChips->value());
-
-    for(int i = 0; i < ui.tableLevels->rowCount(); i++) {
-        Tournament::Level level;
-        level.time_minutes = QVariant(ui.tableLevels->item(i,0)->text()).toInt();
-        level.ante = QVariant(ui.tableLevels->item(i,1)->text()).toInt();
-        level.smallblind = QVariant(ui.tableLevels->item(i,2)->text()).toInt();
-        level.bigblind = QVariant(ui.tableLevels->item(i,3)->text()).toInt();
-        tournament->addLevel(level);
-
-        //qDebug() << "Livello" << i << "-" << level.time_minutes << level.ante << level.smallblind << level.bigblind;
+    if (QMessageBox::question(this, "Inizia Torneo", "Dopo aver iniziato il torneo non potrai piu' modificare le impostazioni.\nContinuare?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+#if QT_VERSION >= 0x040600
+        QWidget * pw = centralWidget();
+        int hw = pw->width() / 2;
+        int he = pw->height() / 2;
+        QPropertyAnimation * ani = 0;
+        for (int i = 0; i < ui.spinGiocatori->value() * 4; i++) {
+            Chip * chip = new Chip(pw);
+            chip->move(ui.startButton->geometry().center() + QPoint(qrand() % 100 - 50, qrand() % 40 - 20));
+            ani = new QPropertyAnimation(chip, "pos", this);
+            ani->setEasingCurve(QEasingCurve::OutQuad);
+            ani->setDuration(1000);
+            ani->setEndValue(QPoint(qrand() % hw + qrand() % hw - 24, qrand() % he - 24));
+            ani->start(QPropertyAnimation::DeleteWhenStopped);
+            ani = new QPropertyAnimation(chip, "opacity", this);
+            ani->setEasingCurve(QEasingCurve::OutQuad);
+            ani->setDuration(1000);
+            ani->setEndValue(0.0);
+            ani->start(QPropertyAnimation::DeleteWhenStopped);
+        }
+        QTimer::singleShot(1200, this, SLOT(startTournament()));
+#else
+        startTournament();
+#endif
     }
-
-    TimerView *tv = new TimerView(tournament);
-    tv->setAttribute(Qt::WA_DeleteOnClose);
-    tv->setWindowState(Qt::WindowFullScreen);
-    tv->show();
 }
 
 void MainWindow::validateStart()
@@ -212,4 +243,30 @@ void MainWindow::validateStart()
            //&& ui.spinRebuyLev->value() > 0
            && ui.tableLevels->rowCount() > 0;
     ui.startButton->setEnabled(ok);
+}
+
+void MainWindow::startTournament()
+{
+    Tournament *tournament = new Tournament(this);
+    tournament->setName(ui.tourneyName->text());
+    tournament->setCurrentPlayers(ui.spinGiocatori->value());
+    tournament->setTotalPlayers(ui.spinGiocatori->value());
+    tournament->setChipsEach(ui.spinChips->value());
+    tournament->setRebuyMaxLevel(ui.spinRebuyLev->value());
+    tournament->setRebuyChips(ui.spinRebuyChips->value());
+
+    for (int i = 0; i < ui.tableLevels->rowCount(); i++) {
+        Tournament::Level level;
+        level.time_minutes = QVariant(ui.tableLevels->item(i,0)->text()).toInt();
+        level.ante = QVariant(ui.tableLevels->item(i,1)->text()).toInt();
+        level.smallblind = QVariant(ui.tableLevels->item(i,2)->text()).toInt();
+        level.bigblind = QVariant(ui.tableLevels->item(i,3)->text()).toInt();
+        tournament->addLevel(level);
+        //qDebug() << "Livello" << i << "-" << level.time_minutes << level.ante << level.smallblind << level.bigblind;
+    }
+
+    TimerView *tv = new TimerView(tournament);
+    tv->setAttribute(Qt::WA_DeleteOnClose);
+    tv->setWindowState(Qt::WindowFullScreen);
+    tv->show();
 }
