@@ -22,8 +22,6 @@
 #include <QTime>
 #include <QTimer>
 
-#include <Phonon/MediaObject>
-
 #include "Tournament.h"
 
 class TimerView : public QGraphicsView
@@ -34,10 +32,6 @@ class TimerView : public QGraphicsView
         TimerView(Tournament *t);
 
     private:
-        Phonon::MediaObject *m_sound_gong;
-        Phonon::MediaObject *m_sound_scream;
-        Phonon::MediaObject *m_sound_tick;
-
         Tournament *m_tournament;
 
         bool m_paused;
