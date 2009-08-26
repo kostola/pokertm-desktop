@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/data">
+        <file>data/chip-black.png</file>
+        <file>data/chip-blue.png</file>
+        <file>data/chip-green.png</file>
+        <file>data/chip-red.png</file>
+        <file>data/chip-white.png</file>
+    </qresource>
+</RCC>

@@ -1,3 +1,17 @@
+/***************************************************************************
+ *                                                                         *
+ *   This file is part of the PokerTournamentManager project,              *
+ *       http://www.gitorious.org/poker-tournament-manager                 *
+ *                                                                         *
+ *   Authors: Alessandro Costa <kost.on.linux@gmail.com>, (C) 2009         *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Lesser General Public License as        *
+ *   published by the Free Software Foundation. For more details see the   *
+ *   COPYING.txt file that comes with this distribution.                   *
+ *                                                                         *
+ ***************************************************************************/
+
 #include "TimerView.h"
 
 #include <QtGui>

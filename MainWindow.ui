@@ -49,8 +49,8 @@ QPushButton:enabled {
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
        <string>Nome Torneo</string>
@@ -62,7 +62,20 @@ QPushButton:enabled {
       </layout>
      </widget>
     </item>
-    <item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_5">
+      <property name="minimumSize">
+       <size>
+        <width>48</width>
+        <height>48</height>
+       </size>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="data.qrc">:/data/data/chip-red.png</pixmap>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="2">
      <widget class="QGroupBox" name="groupBox_2">
       <property name="title">
        <string>Gestione Livelli</string>
@@ -170,7 +183,7 @@ QPushButton:enabled {
       </layout>
      </widget>
     </item>
-    <item>
+    <item row="2" column="0" colspan="2">
      <widget class="QGroupBox" name="groupBox_3">
       <property name="title">
        <string>Gestione Chips</string>
@@ -238,7 +251,7 @@ QPushButton:enabled {
       </layout>
      </widget>
     </item>
-    <item>
+    <item row="3" column="0" colspan="2">
      <widget class="QGroupBox" name="groupBox_4">
       <property name="title">
        <string>Gestione Rebuy</string>
@@ -306,7 +319,7 @@ QPushButton:enabled {
       </layout>
      </widget>
     </item>
-    <item>
+    <item row="4" column="0" colspan="2">
      <widget class="QPushButton" name="startButton">
       <property name="enabled">
        <bool>false</bool>
@@ -384,6 +397,8 @@ QPushButton:enabled {
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="data.qrc"/>
+ </resources>
  <connections/>
 </ui>
