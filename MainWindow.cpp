@@ -56,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
+    ui.tourneyName->setText(tr("Torneo del %1 ore %2").arg(QDate::currentDate().toString("d-M")).arg(QTime::currentTime().toString("h:m")));
+    ui.tourneyName->selectAll();
     ui.tableLevels->setColumnWidth(0, 125);
     ui.tableLevels->setColumnWidth(1, 125);
     ui.tableLevels->setColumnWidth(2, 125);

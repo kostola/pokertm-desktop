@@ -19,9 +19,11 @@
   <property name="windowTitle">
    <string>Poker Tournament Manager - by Kost</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">#MainWindow {
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">#centralwidget {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E0E0E0, stop: 1 #BBB);
+	/*background-color: qlineargradient(spread:repeat, x1:0, y1:0, x2:0.00303828, y2:0.005, stop:0.0789474 rgba(0, 134, 25, 255), stop:0.703349 rgba(0, 98, 10, 255));*/
 }
 QGroupBox {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E0E0E0, stop: 1 #FFFFFF);
@@ -34,7 +36,8 @@ QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top center;
     padding: 0 3px;
-    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFOECE, stop: 1 #FFFFFF);
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6EDF6E, stop: 1 #0E6F0E);
+    color: #fff;
 }
 QPushButton {
     border: 2px solid #8f8f91;
@@ -47,8 +50,7 @@ QPushButton:enabled {
     color: #000;
 }
 </string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
+   </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QGroupBox" name="groupBox">
@@ -57,7 +59,11 @@ QPushButton:enabled {
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLineEdit" name="tourneyName"/>
+        <widget class="QLineEdit" name="tourneyName">
+         <property name="statusTip">
+          <string>Inserisci il nome del torneo</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -69,6 +75,9 @@ QPushButton:enabled {
         <width>48</width>
         <height>48</height>
        </size>
+      </property>
+      <property name="statusTip">
+       <string>:-)</string>
       </property>
       <property name="pixmap">
        <pixmap resource="data.qrc">:/data/chip-red.png</pixmap>
@@ -88,6 +97,9 @@ QPushButton:enabled {
            <width>500</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="statusTip">
+          <string>Completa la tabella del torneo</string>
          </property>
          <column>
           <property name="text">
@@ -134,6 +146,9 @@ QPushButton:enabled {
              <bold>true</bold>
             </font>
            </property>
+           <property name="statusTip">
+            <string>Aggiungi livello</string>
+           </property>
            <property name="text">
             <string>+</string>
            </property>
@@ -159,6 +174,9 @@ QPushButton:enabled {
              <weight>75</weight>
              <bold>true</bold>
             </font>
+           </property>
+           <property name="statusTip">
+            <string>Rimuovi Livello selezionato</string>
            </property>
            <property name="text">
             <string>-</string>
@@ -207,6 +225,9 @@ QPushButton:enabled {
            <height>0</height>
           </size>
          </property>
+         <property name="statusTip">
+          <string>Numero di seats</string>
+         </property>
          <property name="maximum">
           <number>10000</number>
          </property>
@@ -243,6 +264,9 @@ QPushButton:enabled {
            <height>0</height>
           </size>
          </property>
+         <property name="statusTip">
+          <string>Livello iniziale dello stack</string>
+         </property>
          <property name="maximum">
           <number>10000000</number>
          </property>
@@ -274,6 +298,9 @@ QPushButton:enabled {
            <width>160</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="statusTip">
+          <string>Livello del rebuy</string>
          </property>
          <property name="maximum">
           <number>10000</number>
@@ -311,6 +338,9 @@ QPushButton:enabled {
            <height>0</height>
           </size>
          </property>
+         <property name="statusTip">
+          <string>Chip per il rebuy</string>
+         </property>
          <property name="maximum">
           <number>10000000</number>
          </property>
@@ -328,6 +358,9 @@ QPushButton:enabled {
        <font>
         <pointsize>18</pointsize>
        </font>
+      </property>
+      <property name="statusTip">
+       <string>Avvio del torneo</string>
       </property>
       <property name="text">
        <string>S  T  A  R  T</string>
@@ -360,6 +393,15 @@ QPushButton:enabled {
     <property name="title">
      <string>About</string>
     </property>
+    <widget class="QMenu" name="menuSwitch_Language">
+     <property name="title">
+      <string>Switch Language...</string>
+     </property>
+     <addaction name="actionITA_not_implemented"/>
+     <addaction name="actionENG_not_implemented"/>
+    </widget>
+    <addaction name="menuSwitch_Language"/>
+    <addaction name="separator"/>
     <addaction name="actionKost_Rulez"/>
    </widget>
    <addaction name="menuFile"/>
@@ -394,6 +436,16 @@ QPushButton:enabled {
   <action name="actionKost_Rulez">
    <property name="text">
     <string>Kost Rulez ...</string>
+   </property>
+  </action>
+  <action name="actionITA_not_implemented">
+   <property name="text">
+    <string>ITA not implemented</string>
+   </property>
+  </action>
+  <action name="actionENG_not_implemented">
+   <property name="text">
+    <string>ENG not implemented</string>
    </property>
   </action>
  </widget>
