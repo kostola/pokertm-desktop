@@ -26,6 +26,9 @@ void LevelEditDialog::on_pbCancel_clicked()
 
 void LevelEditDialog::on_pbOk_clicked()
 {
+    if(! m_level)
+        return;
+
     m_level->setTime(ui->timeEdit->time());
 
     if(ui->cboxType->currentText() == tr("GIOCO"))
@@ -48,4 +51,11 @@ void LevelEditDialog::setLevel(Level *l, int number)
 {
     m_level = l;
     ui->txtNumber->setText(QString("%1").arg(number));
+
+    ui->cboxType->setCurrentIndex(l->type() == Level::GameLevel ? 0 : 1);
+    ui->timeEdit->setTime(l->time());
+    ui->sboxAnte->setValue(l->ante());
+    ui->sboxBigblind->setValue(l->bigBlind());
+    ui->sboxSmallblind->setValue(l->smallBlind());
+    ui->cboxRebuy->setChecked(l->isRebuyEnabled());
 }

@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>650</width>
+    <width>700</width>
     <height>520</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>650</width>
-    <height>520</height>
+    <width>700</width>
+    <height>480</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -25,17 +25,21 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">#centralwidget {
-    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E0E0E0, stop: 1 #BBB);
-	/*background-color: qlineargradient(spread:repeat, x1:0, y1:0, x2:0.00303828, y2:0.005, stop:0.0789474 rgba(0, 134, 25, 255), stop:0.703349 rgba(0, 98, 10, 255));*/
+    <string notr="true">#centralwidget
+{
+    /*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E0E0E0, stop: 1 #BBB);*/
+	background-color: qlineargradient(spread:repeat, x1:0, y1:0, x2:0.00303828, y2:0.005, stop:0.0789474 rgba(0, 134, 25, 255), stop:0.703349 rgba(0, 98, 10, 255));
 }
-QGroupBox {
+
+QGroupBox
+{
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E0E0E0, stop: 1 #FFFFFF);
     border: 2px solid gray;
     border-radius: 5px;
     margin-top: 1ex;
 	font-weight: bold;
 }
+
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top center;
@@ -43,57 +47,139 @@ QGroupBox::title {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6EDF6E, stop: 1 #0E6F0E);
     color: #fff;
 }
+
 QPushButton {
     border: 2px solid #8f8f91;
     border-radius: 10px;
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #8a8b8e, stop: 1 #dadbde);
     color: #888;
 }
+
 QPushButton:enabled {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #dadbde, stop: 1 #f6f7fa);
     color: #000;
 }
-</string>
+
+#startButton {
+   border-radius: 35px;
+}</string>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QGroupBox" name="gboxTourney">
-      <property name="title">
-       <string>Nome Torneo</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLineEdit" name="tourneyName">
-         <property name="statusTip">
-          <string>Inserisci il nome del torneo</string>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
+      <item>
+       <widget class="QLabel" name="labelChip_4">
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="statusTip">
+         <string>:-)</string>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="data.qrc">:/data/chip-black.png</pixmap>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="gboxTourney">
+        <property name="title">
+         <string>Dati Torneo</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0">
+         <property name="spacing">
+          <number>10</number>
          </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+         <property name="margin">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Nome:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="tourneyName">
+           <property name="statusTip">
+            <string>Inserisci il nome del torneo</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_1">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Giocatori:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="buddy">
+            <cstring>spinPlayers</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinPlayers">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="statusTip">
+            <string>Numero di seats</string>
+           </property>
+           <property name="maximum">
+            <number>10000</number>
+           </property>
+           <property name="value">
+            <number>10000</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelChip">
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="statusTip">
+         <string>:-)</string>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="data.qrc">:/data/chip-red.png</pixmap>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
-    <item row="0" column="1">
-     <widget class="QLabel" name="labelChip">
-      <property name="minimumSize">
-       <size>
-        <width>48</width>
-        <height>48</height>
-       </size>
-      </property>
-      <property name="statusTip">
-       <string>:-)</string>
-      </property>
-      <property name="pixmap">
-       <pixmap resource="data.qrc">:/data/chip-red.png</pixmap>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" colspan="2">
+    <item>
      <widget class="QGroupBox" name="gboxLevels">
       <property name="title">
        <string>Gestione Livelli</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QTableWidget" name="tableLevels">
          <property name="minimumSize">
@@ -105,45 +191,78 @@ QPushButton:enabled {
          <property name="statusTip">
           <string>Completa la tabella del torneo</string>
          </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOn</enum>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>false</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
          <column>
           <property name="text">
            <string>Tipo</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </column>
          <column>
           <property name="text">
            <string>Tempo</string>
           </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+          </property>
          </column>
          <column>
           <property name="text">
            <string>Ante</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </column>
          <column>
           <property name="text">
            <string>Piccolo Buio</string>
           </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+          </property>
          </column>
          <column>
           <property name="text">
            <string>Grande Buio</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </column>
          <column>
           <property name="text">
            <string>Rebuy</string>
           </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+          </property>
          </column>
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QPushButton" name="levelAdd">
+        <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,1">
+         <property name="spacing">
+          <number>5</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="levelUp">
            <property name="minimumSize">
             <size>
-             <width>30</width>
+             <width>35</width>
              <height>30</height>
             </size>
            </property>
@@ -155,36 +274,7 @@ QPushButton:enabled {
            </property>
            <property name="font">
             <font>
-             <pointsize>16</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="statusTip">
-            <string>Aggiungi livello</string>
-           </property>
-           <property name="text">
-            <string>+</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="levelRem">
-           <property name="minimumSize">
-            <size>
-             <width>30</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>30</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
+             <pointsize>14</pointsize>
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -193,11 +283,127 @@ QPushButton:enabled {
             <string>Rimuovi Livello selezionato</string>
            </property>
            <property name="text">
-            <string>-</string>
+            <string>^</string>
            </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="levelDown">
+           <property name="minimumSize">
+            <size>
+             <width>35</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="statusTip">
+            <string>Rimuovi Livello selezionato</string>
+           </property>
+           <property name="text">
+            <string>v</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QPushButton" name="levelAdd">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="statusTip">
+            <string>Aggiungi livello</string>
+           </property>
+           <property name="text">
+            <string>Aggiungi</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <widget class="QPushButton" name="levelRem">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="statusTip">
+            <string>Rimuovi Livello selezionato</string>
+           </property>
+           <property name="text">
+            <string>Rimuovi</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="QPushButton" name="levelEdit">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="statusTip">
+            <string>Rimuovi Livello selezionato</string>
+           </property>
+           <property name="text">
+            <string>Modifica</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0" colspan="2">
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -215,35 +421,53 @@ QPushButton:enabled {
       </layout>
      </widget>
     </item>
-    <item row="2" column="0" colspan="2">
+    <item>
      <widget class="QGroupBox" name="gboxChips">
       <property name="title">
        <string>Gestione Chips</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0,1,0,0">
        <item>
-        <widget class="QLabel" name="label_1">
+        <widget class="QLabel" name="label_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
-          <string>Giocatori:</string>
+          <string>Stack iniziale:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
          <property name="buddy">
-          <cstring>spinPlayers</cstring>
+          <cstring>spinChips</cstring>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinPlayers">
+        <widget class="QSpinBox" name="spinChips">
          <property name="minimumSize">
           <size>
-           <width>160</width>
+           <width>180</width>
            <height>0</height>
           </size>
          </property>
          <property name="statusTip">
-          <string>Numero di seats</string>
+          <string>Livello iniziale dello stack</string>
          </property>
          <property name="maximum">
-          <number>10000</number>
+          <number>100000000</number>
+         </property>
+         <property name="value">
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -261,83 +485,24 @@ QPushButton:enabled {
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Chip a testa:</string>
-         </property>
-         <property name="buddy">
-          <cstring>spinChips</cstring>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSpinBox" name="spinChips">
-         <property name="minimumSize">
-          <size>
-           <width>160</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="statusTip">
-          <string>Livello iniziale dello stack</string>
-         </property>
-         <property name="maximum">
-          <number>10000000</number>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="3" column="0" colspan="2">
-     <widget class="QGroupBox" name="gboxRebuy">
-      <property name="title">
-       <string>Gestione Rebuy</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Livello:</string>
-         </property>
-         <property name="buddy">
-          <cstring>spinPlayers</cstring>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSpinBox" name="spinRebuyLev">
-         <property name="minimumSize">
-          <size>
-           <width>160</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="statusTip">
-          <string>Livello del rebuy</string>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QLabel" name="label_4">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
-          <string>Chip:</string>
+          <string>Stack rebuy:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="buddy">
           <cstring>spinChips</cstring>
@@ -348,7 +513,7 @@ QPushButton:enabled {
         <widget class="QSpinBox" name="spinRebuyChips">
          <property name="minimumSize">
           <size>
-           <width>160</width>
+           <width>180</width>
            <height>0</height>
           </size>
          </property>
@@ -356,30 +521,106 @@ QPushButton:enabled {
           <string>Chip per il rebuy</string>
          </property>
          <property name="maximum">
-          <number>10000000</number>
+          <number>100000000</number>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
     </item>
-    <item row="4" column="0" colspan="2">
-     <widget class="QPushButton" name="startButton">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>18</pointsize>
-       </font>
-      </property>
-      <property name="statusTip">
-       <string>Avvio del torneo</string>
-      </property>
-      <property name="text">
-       <string>S  T  A  R  T</string>
-      </property>
-     </widget>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1,0,1,0">
+      <item>
+       <widget class="QLabel" name="labelChip_2">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="statusTip">
+         <string>:-)</string>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="data.qrc">:/data/chip-white.png</pixmap>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="startButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>220</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>28</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="statusTip">
+         <string>Avvio del torneo</string>
+        </property>
+        <property name="text">
+         <string>S T A R T</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelChip_3">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="statusTip">
+         <string>:-)</string>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="data.qrc">:/data/chip-blue.png</pixmap>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -388,7 +629,7 @@ QPushButton:enabled {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>650</width>
+     <width>700</width>
      <height>25</height>
     </rect>
    </property>

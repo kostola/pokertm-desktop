@@ -23,6 +23,8 @@
 
 Level::Level()
 {
+    m_time.setHMS(0,0,0);
+
     m_ante       = 0;
     m_bigblind   = 0;
     m_smallblind = 0;
@@ -187,10 +189,14 @@ Tournament::~Tournament()
         delete l;
 }
 
-Level* Tournament::addLevel()
+Level* Tournament::addLevel(int pos)
 {
     Level* l = new Level;
-    m_levels.append(l);
+
+    if(pos < 0 || pos >= m_levels.size())
+        m_levels.append(l);
+    else
+        m_levels.insert(pos, l);
 
     return l;
 }
@@ -225,6 +231,22 @@ int Tournament::countLevels()
     return m_levels.size();
 }
 
+void Tournament::moveLevelDown(int pos)
+{
+    if(pos < 0 || pos >= m_levels.size() - 1)
+        return;
+
+    m_levels.swap(pos,pos+1);
+}
+
+void Tournament::moveLevelUp(int pos)
+{
+    if(pos <= 0 || pos > m_levels.size() - 1)
+        return;
+
+    m_levels.swap(pos,pos-1);
+}
+
 QString Tournament::name()
 {
     return m_name;
@@ -240,10 +262,18 @@ int Tournament::rebuyMaxLevel()
     return m_rebuy_maxlevel;
 }
 
-void Tournament::removeLastLevel()
+void Tournament::removeLevel(int pos)
 {
-    Level *l = m_levels.takeLast();
-    delete l;
+    if(pos < 0 || pos >= m_levels.size() - 1)
+    {
+        Level *l = m_levels.takeLast();
+        delete l;
+    }
+    else
+    {
+        Level *l = m_levels.takeAt(pos);
+        delete l;
+    }
 }
 
 int Tournament::totalChips()
@@ -257,6 +287,7 @@ int Tournament::totalPlayers()
 }
 
 void Tournament::playerOut()
+
 {
     if(m_current_players > 1)
         m_current_players--;

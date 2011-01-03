@@ -51,7 +51,10 @@ class MainWindow : public QMainWindow
         void on_actionSave_triggered();
         void on_actionSaveAs_triggered();
         void on_levelAdd_clicked();
+        void on_levelDown_clicked();
+        void on_levelEdit_clicked();
         void on_levelRem_clicked();
+        void on_levelUp_clicked();
         void on_startButton_clicked();
         void startTournament();
         void validateStart();

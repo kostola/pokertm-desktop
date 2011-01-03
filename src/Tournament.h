@@ -73,10 +73,12 @@ class Tournament : public QObject
         Tournament();
         ~Tournament();
 
-        Level* addLevel();
+        Level* addLevel(int pos = -1);
         int countLevels();
         Level* level(int number);
-        void removeLastLevel();
+        void moveLevelDown(int pos);
+        void moveLevelUp(int pos);
+        void removeLevel(int pos = -1);
 
         int chipsEach();
         void setChipsEach(int c);
