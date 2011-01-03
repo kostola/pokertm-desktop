@@ -30,6 +30,8 @@ FORMS += MainWindow.ui \
 
 RESOURCES += data.qrc
 
+win32: RC_FILE = pokertm.rc
+
 # windows
 win32: DEFINES += USE_QSOUND
 else: {
