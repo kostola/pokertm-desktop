@@ -24,6 +24,8 @@
 #include "TimerView.h"
 #include "Tournament.h"
 
+// ===== CLASS "Chip" =============================================================================
+
 Chip::Chip(QWidget * parent)
   : QWidget(parent)
   , m_opacity(1.0)
@@ -53,6 +55,7 @@ void Chip::paintEvent(QPaintEvent * /*event*/)
     p.drawPixmap(0, 0, m_pix);
 }
 
+// ===== CLASS "MainWindow" =======================================================================
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

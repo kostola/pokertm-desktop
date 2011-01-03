@@ -18,42 +18,93 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QTime>
 
-class Tournament : public QObject
+class Level
 {
     public:
-        typedef struct {
-            int time_minutes;
-            int ante;
-            int bigblind;
-            int smallblind;
-        } Level;
+        enum LevelType
+        {
+            GameLevel,
+            PauseLevel
+        };
 
-        Tournament(QObject *parent = 0);
-        void addLevel(Level l);
-        int getAverageStack();
-        int getChipsEach();
-        int getCurrentPlayers();
-        Level getLevel(int number);
-        int getLevels();
-        QString getName();
-        int getRebuyChips();
-        int getRebuyMaxLevel();
-        int getTotalChips();
-        int getTotalPlayers();
+        int ante();
+        void setAnte(int a);
+
+        int bigBlind();
+        void setBigBlind(int bb);
+
+        int smallBlind();
+        void setSmallBlind(int sb);
+
+        bool isRebuyEnabled();
+        void setRebuyEnabled(bool r);
+
+        QTime time();
+        void setTime(const QTime& t);
+        void setTime(int min, int sec = 0);
+
+        LevelType type();
+        void setType(LevelType t);
+
+        bool isValid();
+        QString toString();
+
+    private:
+        Level();
+        ~Level();
+
+        friend class Tournament;
+
+        int m_ante;
+        int m_bigblind;
+        int m_smallblind;
+
+        bool m_rebuy_enabled;
+        QTime m_time;
+        LevelType m_type;
+};
+
+class Tournament
+{
+    public:
+        Tournament();
+        ~Tournament();
+
+        Level* addLevel();
+        Level* level(int number);
+        int countLevels();
+
+        int chipsEach();
+        void setChipsEach(int c);
+
+        int currentPlayers();
+        void setCurrentPlayers(int cp);
+
+        QString name();
+        void setName(const QString& n);
+
+        int rebuyChips();
+        void setRebuyChips(int c);
+
+        int rebuyMaxLevel();
+        void setRebuyMaxLevel(int l);
+
+        int totalPlayers();
+        void setTotalPlayers(int tp);
+
+        int averageStack();
+        int totalChips();
+
         void playerOut();
         void rebuy(int currentLevel);
-        void setChipsEach(int c);
-        void setCurrentPlayers(int cp);
-        void setName(const QString& n);
-        void setTotalPlayers(int tp);
-        void setRebuyChips(int c);
-        void setRebuyMaxLevel(int l);
+
         QString toString();
 
     private:
         QString m_name;
-        QList<Level> m_levels;
+        QList<Level*> m_levels;
         int m_chips_each;
         int m_current_players;
         int m_rebuy_maxlevel;

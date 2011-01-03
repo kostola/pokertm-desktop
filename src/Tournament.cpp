@@ -16,6 +16,146 @@
 
 #include <QDebug>
 
+#define MIN_GAMELEVEL_MINUTES  2
+#define MIN_PAUSELEVEL_MINUTES 1
+
+// ===== CLASS "Level" ============================================================================
+
+Level::Level()
+{
+    m_ante       = 0;
+    m_bigblind   = 0;
+    m_smallblind = 0;
+
+    m_rebuy_enabled = false;
+    m_type = GameLevel;
+}
+
+Level::~Level()
+{
+}
+
+int Level::ante()
+{
+    return m_ante;
+}
+
+int Level::bigBlind()
+{
+    return m_bigblind;
+}
+
+bool Level::isRebuyEnabled()
+{
+    return m_rebuy_enabled;
+}
+
+bool Level::isValid()
+{
+    if(type() == GameLevel)
+    {
+        // small blind and big blind must have a positive non zero value
+        if(smallBlind() == 0 || bigBlind() == 0)
+            return false;
+
+        // a game level must be at least two minutes long
+        if(time().minute() < MIN_GAMELEVEL_MINUTES)
+            return false;
+
+        return true;
+    }
+
+    if(type() == PauseLevel)
+    {
+        // a pause level must be at least one minute long
+        if(time().minute() < MIN_PAUSELEVEL_MINUTES)
+            return false;
+
+        return true;
+    }
+
+    return false;
+}
+
+void Level::setAnte(int a)
+{
+    if(a < 0)
+        return;
+
+    m_ante = a;
+}
+
+void Level::setBigBlind(int bb)
+{
+    if(bb < 0)
+        return;
+
+    m_bigblind = bb;
+}
+
+void Level::setRebuyEnabled(bool r)
+{
+    m_rebuy_enabled = r;
+}
+
+void Level::setSmallBlind(int sb)
+{
+    if(sb < 0)
+        return;
+
+    m_smallblind = sb;
+}
+
+void Level::setTime(const QTime& t)
+{
+    m_time = t;
+}
+
+void Level::setTime(int min, int sec = 0)
+{
+    m_time = QTime(0, min, sec);
+}
+
+void Level::setType(LevelType t)
+{
+    m_type = t;
+}
+
+int Level::smallBlind()
+{
+    return m_smallblind;
+}
+
+QTime Level::time()
+{
+    return m_time;
+}
+
+QString Level::toString()
+{
+    QString strtype = "U";
+
+    switch(type())
+    {
+        case GameLevel:
+            strtype = "G";
+            break;
+
+        case PauseLevel:
+            strtype = "P";
+            break;
+    }
+
+    return QString("[Type:%1, Time:%2, Rebuy:%6, Ante:%3, SB:%4, BB:%5]").arg(strtype).arg(time().toString("mm:ss")).arg(ante()).arg(smallBlind()).arg(bigBlind()).arg(isRebuyEnabled()? "Y":"N");
+}
+
+LevelType Level::type()
+{
+    return m_type;
+}
+
+// ===== CLASS "Tournament" =======================================================================
+
 Tournament::Tournament(QObject *parent)
     : QObject(parent)
 {
@@ -27,62 +167,68 @@ Tournament::Tournament(QObject *parent)
     m_total_players = 0;
 }
 
-void Tournament::addLevel(Level l)
+Tournament::~Tournament()
 {
+    qDeleteAll(m_levels);
+}
+
+Level* Tournament::addLevel()
+{
+    Level* l = new Level;
     m_levels.append(l);
 }
 
-int Tournament::getAverageStack()
+int Tournament::averageStack()
 {
-    return getTotalChips() / m_current_players;
+    return totalChips() / m_current_players;
 }
 
-int Tournament::getChipsEach()
+int Tournament::chipsEach()
 {
     return m_chips_each;
 }
 
-int Tournament::getCurrentPlayers()
+int Tournament::currentPlayers()
 {
     return m_current_players;
 }
 
-Tournament::Level Tournament::getLevel(int number)
+Level* Tournament::level(int number)
 {
     //qDebug() << this->toString();
 
     if(number < 0 || getLevels() == 0)
-        return Level();
+        return 0;
 
-    return m_levels.at(std::min(number, getLevels() - 1));
+    return m_levels.at(qMin(number, getLevels() - 1));
 }
 
-int Tournament::getLevels()
+int Tournament::countLevels()
 {
     return m_levels.size();
 }
 
-QString Tournament::getName()
+QString Tournament::name()
 {
     return m_name;
 }
 
-int Tournament::getRebuyChips()
+int Tournament::rebuyChips()
 {
     return m_rebuy_chips;
 }
 
-int Tournament::getRebuyMaxLevel()
+int Tournament::rebuyMaxLevel()
 {
     return m_rebuy_maxlevel;
 }
 
-int Tournament::getTotalChips()
+int Tournament::totalChips()
 {
     return m_total_players * m_chips_each + m_rebuys * m_rebuy_chips;
 }
 
-int Tournament::getTotalPlayers()
+int Tournament::totalPlayers()
 {
     return m_total_players;
 }
@@ -135,8 +281,8 @@ void Tournament::setRebuyMaxLevel(int l)
 QString Tournament::toString()
 {
     QString str;
-    foreach(Level l, m_levels) {
-        str.append(QString("[Tempo:%1, Ante:%2, SB:%3, BB:%4] ").arg(l.time_minutes).arg(l.ante).arg(l.smallblind).arg(l.bigblind));
+    foreach(Level* l, m_levels) {
+        str.append(QString("%1 ").arg(l->toString());
     }
     return str;
 }
