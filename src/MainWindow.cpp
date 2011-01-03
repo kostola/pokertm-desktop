@@ -14,11 +14,13 @@
  ***************************************************************************/
 
 #include "MainWindow.h"
+#include "ui_MainWindow.h"
+
+#include <QtXml>
 #include <QMessageBox>
 #include <QFileDialog>
 
-#include <QtXml>
-
+#include "AboutWidget.h"
 #include "TimerView.h"
 #include "Tournament.h"
 
@@ -54,23 +56,53 @@ void Chip::paintEvent(QPaintEvent * /*event*/)
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
-    ui.setupUi(this);
-    ui.tourneyName->setText(tr("Torneo del %1 ore %2").arg(QDate::currentDate().toString("d-M")).arg(QTime::currentTime().toString("h:m")));
-    ui.tourneyName->selectAll();
-    ui.tableLevels->setColumnWidth(0, 125);
-    ui.tableLevels->setColumnWidth(1, 125);
-    ui.tableLevels->setColumnWidth(2, 125);
-    ui.tableLevels->setColumnWidth(3, 125);
-    connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
+    ui->setupUi(this);
+    ui->tourneyName->setText(tr("Torneo del %1 ore %2").arg(QDate::currentDate().toString("d-M")).arg(QTime::currentTime().toString("h:m")));
+    ui->tourneyName->selectAll();
+    ui->tableLevels->setColumnWidth(0, 125);
+    ui->tableLevels->setColumnWidth(1, 125);
+    ui->tableLevels->setColumnWidth(2, 125);
+    ui->tableLevels->setColumnWidth(3, 125);
+    connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
     // input validation (prevents segfaults)
-    connect(ui.tourneyName, SIGNAL(textChanged(QString)), this, SLOT(validateStart()));
-    connect(ui.tableLevels, SIGNAL(cellChanged(int,int)), this, SLOT(validateStart()));
-    connect(ui.spinGiocatori, SIGNAL(valueChanged(int)), this, SLOT(validateStart()));
-    connect(ui.spinChips, SIGNAL(valueChanged(int)), this, SLOT(validateStart()));
-    connect(ui.spinRebuyLev, SIGNAL(valueChanged(int)), this, SLOT(validateStart()));
-    connect(ui.spinRebuyChips, SIGNAL(valueChanged(int)), this, SLOT(validateStart()));
+    connect(ui->tourneyName, SIGNAL(textChanged(QString)), this, SLOT(validateStart()));
+    connect(ui->tableLevels, SIGNAL(cellChanged(int,int)), this, SLOT(validateStart()));
+    connect(ui->spinGiocatori, SIGNAL(valueChanged(int)), this, SLOT(validateStart()));
+    connect(ui->spinChips, SIGNAL(valueChanged(int)), this, SLOT(validateStart()));
+    connect(ui->spinRebuyLev, SIGNAL(valueChanged(int)), this, SLOT(validateStart()));
+    connect(ui->spinRebuyChips, SIGNAL(valueChanged(int)), this, SLOT(validateStart()));
+
+    m_about_widget = new AboutWidget;
+
+    m_appsettings = new QSettings("settings.ini", QSettings::IniFormat, this);
+    if(m_appsettings->contains("MainWindowGeometry"))
+        this->setGeometry(m_appsettings->value("MainWindowGeometry").toRect());
+}
+
+MainWindow::~MainWindow()
+{
+    m_appsettings->setValue("MainWindowGeometry", geometry());
+
+    delete ui;
+    delete m_about_widget;
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    int pos_x = frameGeometry().x() + (frameGeometry().width() - m_about_widget->frameGeometry().width()) / 2;
+    int pos_y = frameGeometry().y() + (frameGeometry().height() - m_about_widget->frameGeometry().height()) / 2;
+
+//    qDebug() << "New Pos is" << pos_x << pos_y;
+
+    m_about_widget->move(pos_x, pos_y);
+
+    if(m_about_widget->isVisible())
+        m_about_widget->raise();
+    else
+        m_about_widget->show();
 }
 
 void MainWindow::on_actionNew_triggered()
@@ -79,13 +111,13 @@ void MainWindow::on_actionNew_triggered()
         on_actionSaveAs_triggered();
     }
 
-    ui.tourneyName->clear();
-    ui.tableLevels->clearContents();
-    ui.tableLevels->setRowCount(0);
-    ui.spinChips->setValue(0);
-    ui.spinGiocatori->setValue(0);
-    ui.spinRebuyChips->setValue(0);
-    ui.spinRebuyLev->setValue(0);
+    ui->tourneyName->clear();
+    ui->tableLevels->clearContents();
+    ui->tableLevels->setRowCount(0);
+    ui->spinChips->setValue(0);
+    ui->spinGiocatori->setValue(0);
+    ui->spinRebuyChips->setValue(0);
+    ui->spinRebuyLev->setValue(0);
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -106,33 +138,33 @@ void MainWindow::on_actionOpen_triggered()
     doc.setContent(&file);
 
     QDomNode node_tournament = doc.childNodes().at(0);
-    ui.tourneyName->setText(node_tournament.attributes().namedItem("name").nodeValue());
+    ui->tourneyName->setText(node_tournament.attributes().namedItem("name").nodeValue());
 
     QDomNode node_levels = node_tournament.childNodes().at(0);
     for(int i = 0; i < node_levels.childNodes().size(); i++) {
         QDomNode node_lev = node_levels.childNodes().at(i);
-        ui.tableLevels->setRowCount(i+1);
+        ui->tableLevels->setRowCount(i+1);
 
-        ui.tableLevels->setItem(i, 0, new QTableWidgetItem(""));
-        ui.tableLevels->setItem(i, 1, new QTableWidgetItem(""));
-        ui.tableLevels->setItem(i, 2, new QTableWidgetItem(""));
-        ui.tableLevels->setItem(i, 3, new QTableWidgetItem(""));
+        ui->tableLevels->setItem(i, 0, new QTableWidgetItem(""));
+        ui->tableLevels->setItem(i, 1, new QTableWidgetItem(""));
+        ui->tableLevels->setItem(i, 2, new QTableWidgetItem(""));
+        ui->tableLevels->setItem(i, 3, new QTableWidgetItem(""));
 
-        ui.tableLevels->item(i, 0)->setText(node_lev.attributes().namedItem("time").nodeValue());
-        ui.tableLevels->item(i, 1)->setText(node_lev.attributes().namedItem("ante").nodeValue());
-        ui.tableLevels->item(i, 2)->setText(node_lev.attributes().namedItem("smallblind").nodeValue());
-        ui.tableLevels->item(i, 3)->setText(node_lev.attributes().namedItem("bigblind").nodeValue());
+        ui->tableLevels->item(i, 0)->setText(node_lev.attributes().namedItem("time").nodeValue());
+        ui->tableLevels->item(i, 1)->setText(node_lev.attributes().namedItem("ante").nodeValue());
+        ui->tableLevels->item(i, 2)->setText(node_lev.attributes().namedItem("smallblind").nodeValue());
+        ui->tableLevels->item(i, 3)->setText(node_lev.attributes().namedItem("bigblind").nodeValue());
 
         //qDebug() << node_lev.attributes().namedItem("time").nodeValue() << node_lev.attributes().namedItem("ante").nodeValue() << node_lev.attributes().namedItem("smallblind").nodeValue() << node_lev.attributes().namedItem("bigblind").nodeValue();
     }
 
     QDomNode node_players = node_tournament.childNodes().at(1);
-    ui.spinGiocatori->setValue(QVariant(node_players.attributes().namedItem("number").nodeValue()).toInt());
-    ui.spinChips->setValue(QVariant(node_players.attributes().namedItem("chipseach").nodeValue()).toInt());
+    ui->spinGiocatori->setValue(QVariant(node_players.attributes().namedItem("number").nodeValue()).toInt());
+    ui->spinChips->setValue(QVariant(node_players.attributes().namedItem("chipseach").nodeValue()).toInt());
 
     QDomNode node_rebuy = node_tournament.childNodes().at(2);
-    ui.spinRebuyLev->setValue(QVariant(node_rebuy.attributes().namedItem("maxlevel").nodeValue()).toInt());
-    ui.spinRebuyChips->setValue(QVariant(node_rebuy.attributes().namedItem("chips").nodeValue()).toInt());
+    ui->spinRebuyLev->setValue(QVariant(node_rebuy.attributes().namedItem("maxlevel").nodeValue()).toInt());
+    ui->spinRebuyChips->setValue(QVariant(node_rebuy.attributes().namedItem("chips").nodeValue()).toInt());
 
     //qDebug() << doc.toString();
 }
@@ -150,29 +182,29 @@ void MainWindow::on_actionSaveAs_triggered()
 
     QDomDocument doc("xml-pokertimer");
     QDomElement el_tournament = doc.createElement("tournament");
-    el_tournament.setAttribute("name", ui.tourneyName->text());
+    el_tournament.setAttribute("name", ui->tourneyName->text());
     doc.appendChild(el_tournament);
 
     QDomElement el_levels = doc.createElement("levels");
     el_tournament.appendChild(el_levels);
 
-    for(int i = 0; i < ui.tableLevels->rowCount(); i++) {
+    for(int i = 0; i < ui->tableLevels->rowCount(); i++) {
         QDomElement el_lev = doc.createElement("level");
-        el_lev.setAttribute("time", ui.tableLevels->item(i,0)->text());
-        el_lev.setAttribute("ante", ui.tableLevels->item(i,1)->text());
-        el_lev.setAttribute("smallblind", ui.tableLevels->item(i,2)->text());
-        el_lev.setAttribute("bigblind", ui.tableLevels->item(i,3)->text());
+        el_lev.setAttribute("time", ui->tableLevels->item(i,0)->text());
+        el_lev.setAttribute("ante", ui->tableLevels->item(i,1)->text());
+        el_lev.setAttribute("smallblind", ui->tableLevels->item(i,2)->text());
+        el_lev.setAttribute("bigblind", ui->tableLevels->item(i,3)->text());
         el_levels.appendChild(el_lev);
     }
 
     QDomElement el_players = doc.createElement("players");
-    el_players.setAttribute("number", QString::number(ui.spinGiocatori->value()));
-    el_players.setAttribute("chipseach", QString::number(ui.spinChips->value()));
+    el_players.setAttribute("number", QString::number(ui->spinGiocatori->value()));
+    el_players.setAttribute("chipseach", QString::number(ui->spinChips->value()));
     el_tournament.appendChild(el_players);
 
     QDomElement el_rebuy = doc.createElement("rebuy");
-    el_rebuy.setAttribute("maxlevel", QString::number(ui.spinRebuyLev->value()));
-    el_rebuy.setAttribute("chips", QString::number(ui.spinRebuyChips->value()));
+    el_rebuy.setAttribute("maxlevel", QString::number(ui->spinRebuyLev->value()));
+    el_rebuy.setAttribute("chips", QString::number(ui->spinRebuyChips->value()));
     el_tournament.appendChild(el_rebuy);
 
     QFile file(fileName);
@@ -183,23 +215,23 @@ void MainWindow::on_actionSaveAs_triggered()
 
 void MainWindow::on_addLevel_clicked()
 {
-    //qDebug() << ui.tableLevels->currentRow();
-    if(ui.tableLevels->currentRow() >= 0 && ui.tableLevels->currentRow() < ui.tableLevels->rowCount() - 1) {
-        ui.tableLevels->insertRow(ui.tableLevels->currentRow() + 1);
+    //qDebug() << ui->tableLevels->currentRow();
+    if(ui->tableLevels->currentRow() >= 0 && ui->tableLevels->currentRow() < ui->tableLevels->rowCount() - 1) {
+        ui->tableLevels->insertRow(ui->tableLevels->currentRow() + 1);
     }
     else {
-        ui.tableLevels->setRowCount(ui.tableLevels->rowCount() + 1);
+        ui->tableLevels->setRowCount(ui->tableLevels->rowCount() + 1);
     }
 }
 
 void MainWindow::on_remLevel_clicked()
 {
-    if(ui.tableLevels->rowCount() > 0) {
-        if(ui.tableLevels->currentRow() < 0) {
-            ui.tableLevels->setRowCount(ui.tableLevels->rowCount() - 1);
+    if(ui->tableLevels->rowCount() > 0) {
+        if(ui->tableLevels->currentRow() < 0) {
+            ui->tableLevels->setRowCount(ui->tableLevels->rowCount() - 1);
         }
         else {
-            ui.tableLevels->removeRow(ui.tableLevels->currentRow());
+            ui->tableLevels->removeRow(ui->tableLevels->currentRow());
         }
     }
 }
@@ -215,9 +247,9 @@ void MainWindow::on_startButton_clicked()
         int hw = pw->width() / 2;
         int he = pw->height() / 2;
         QPropertyAnimation * ani = 0;
-        for (int i = 0; i < ui.spinGiocatori->value() * 4; i++) {
+        for (int i = 0; i < ui->spinGiocatori->value() * 4; i++) {
             Chip * chip = new Chip(pw);
-            chip->move(ui.startButton->geometry().center() + QPoint(qrand() % 100 - 50, qrand() % 40 - 20));
+            chip->move(ui->startButton->geometry().center() + QPoint(qrand() % 100 - 50, qrand() % 40 - 20));
             ani = new QPropertyAnimation(chip, "pos", this);
             ani->setEasingCurve(QEasingCurve::OutQuad);
             ani->setDuration(1000);
@@ -238,31 +270,31 @@ void MainWindow::on_startButton_clicked()
 
 void MainWindow::validateStart()
 {
-    bool ok = !ui.tourneyName->text().isEmpty()
-           && ui.spinChips->value() > 0
-           && ui.spinGiocatori->value() > 0
-           //&& ui.spinRebuyChips->value() > 0
-           //&& ui.spinRebuyLev->value() > 0
-           && ui.tableLevels->rowCount() > 0;
-    ui.startButton->setEnabled(ok);
+    bool ok = !ui->tourneyName->text().isEmpty()
+           && ui->spinChips->value() > 0
+           && ui->spinGiocatori->value() > 0
+           //&& ui->spinRebuyChips->value() > 0
+           //&& ui->spinRebuyLev->value() > 0
+           && ui->tableLevels->rowCount() > 0;
+    ui->startButton->setEnabled(ok);
 }
 
 void MainWindow::startTournament()
 {
     Tournament *tournament = new Tournament(this);
-    tournament->setName(ui.tourneyName->text());
-    tournament->setCurrentPlayers(ui.spinGiocatori->value());
-    tournament->setTotalPlayers(ui.spinGiocatori->value());
-    tournament->setChipsEach(ui.spinChips->value());
-    tournament->setRebuyMaxLevel(ui.spinRebuyLev->value());
-    tournament->setRebuyChips(ui.spinRebuyChips->value());
+    tournament->setName(ui->tourneyName->text());
+    tournament->setCurrentPlayers(ui->spinGiocatori->value());
+    tournament->setTotalPlayers(ui->spinGiocatori->value());
+    tournament->setChipsEach(ui->spinChips->value());
+    tournament->setRebuyMaxLevel(ui->spinRebuyLev->value());
+    tournament->setRebuyChips(ui->spinRebuyChips->value());
 
-    for (int i = 0; i < ui.tableLevels->rowCount(); i++) {
+    for (int i = 0; i < ui->tableLevels->rowCount(); i++) {
         Tournament::Level level;
-        level.time_minutes = QVariant(ui.tableLevels->item(i,0)->text()).toInt();
-        level.ante = QVariant(ui.tableLevels->item(i,1)->text()).toInt();
-        level.smallblind = QVariant(ui.tableLevels->item(i,2)->text()).toInt();
-        level.bigblind = QVariant(ui.tableLevels->item(i,3)->text()).toInt();
+        level.time_minutes = QVariant(ui->tableLevels->item(i,0)->text()).toInt();
+        level.ante = QVariant(ui->tableLevels->item(i,1)->text()).toInt();
+        level.smallblind = QVariant(ui->tableLevels->item(i,2)->text()).toInt();
+        level.bigblind = QVariant(ui->tableLevels->item(i,3)->text()).toInt();
         tournament->addLevel(level);
         //qDebug() << "Livello" << i << "-" << level.time_minutes << level.ante << level.smallblind << level.bigblind;
     }

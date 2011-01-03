@@ -12,14 +12,17 @@ UI_DIR = .obj
 # Input files
 HEADERS += MainWindow.h \
     TimerView.h \
-    Tournament.h
+    Tournament.h \
+    AboutWidget.h
 
 SOURCES += main.cpp \
     MainWindow.cpp \
     TimerView.cpp \
-    Tournament.cpp
+    Tournament.cpp \
+    AboutWidget.cpp
 
-FORMS += MainWindow.ui
+FORMS += MainWindow.ui \
+    AboutWidget.ui
 
 RESOURCES += data.qrc
 
@@ -27,5 +30,5 @@ RESOURCES += data.qrc
 win32: DEFINES += USE_QSOUND
 else: {
     QT += phonon
-    INCLUDEPATH += /usr/include/KDE
+    INCLUDEPATH += /usr/include/phonon
 }

@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Poker Tournament Manager - by Kost</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="data.qrc">
+    <normaloff>:/data/icon.svg</normaloff>:/data/icon.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
     <string notr="true">#centralwidget {
@@ -375,12 +379,12 @@ QPushButton:enabled {
      <x>0</x>
      <y>0</y>
      <width>650</width>
-     <height>26</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
@@ -391,18 +395,18 @@ QPushButton:enabled {
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
-     <string>About</string>
+     <string>&amp;Aiuto</string>
     </property>
     <widget class="QMenu" name="menuSwitch_Language">
      <property name="title">
-      <string>Switch Language...</string>
+      <string>&amp;Lingua</string>
      </property>
-     <addaction name="actionITA_not_implemented"/>
-     <addaction name="actionENG_not_implemented"/>
+     <addaction name="actionLangIta"/>
+     <addaction name="actionLangEng"/>
     </widget>
     <addaction name="menuSwitch_Language"/>
     <addaction name="separator"/>
-    <addaction name="actionKost_Rulez"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAbout"/>
@@ -410,27 +414,27 @@ QPushButton:enabled {
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">
    <property name="text">
-    <string>Nuovo</string>
+    <string>&amp;Nuovo</string>
    </property>
   </action>
   <action name="actionOpen">
    <property name="text">
-    <string>Apri</string>
+    <string>&amp;Apri</string>
    </property>
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>Salva</string>
+    <string>&amp;Salva</string>
    </property>
   </action>
   <action name="actionSaveAs">
    <property name="text">
-    <string>Salva Come...</string>
+    <string>Salva &amp;Come...</string>
    </property>
   </action>
   <action name="actionExit">
    <property name="text">
-    <string>Esci</string>
+    <string>&amp;Esci</string>
    </property>
   </action>
   <action name="actionKost_Rulez">
@@ -438,14 +442,30 @@ QPushButton:enabled {
     <string>Kost Rulez ...</string>
    </property>
   </action>
-  <action name="actionITA_not_implemented">
+  <action name="actionLangIta">
+   <property name="icon">
+    <iconset resource="data.qrc">
+     <normaloff>:/data/flag_IT.jpg</normaloff>:/data/flag_IT.jpg</iconset>
+   </property>
    <property name="text">
-    <string>ITA not implemented</string>
+    <string>Italiano</string>
    </property>
   </action>
-  <action name="actionENG_not_implemented">
+  <action name="actionLangEng">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="data.qrc">
+     <normaloff>:/data/flag_EN.jpg</normaloff>:/data/flag_EN.jpg</iconset>
+   </property>
    <property name="text">
-    <string>ENG not implemented</string>
+    <string>English</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>&amp;Informazioni</string>
    </property>
   </action>
  </widget>

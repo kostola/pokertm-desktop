@@ -16,22 +16,33 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+//#include "ui_MainWindow.h"
+
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QSettings>
 #include <QSpinBox>
 #include <QTableWidget>
-#include "ui_MainWindow.h"
+
+namespace Ui {
+    class MainWindow;
+}
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
     public:
         MainWindow(QWidget *parent = 0);
+        ~MainWindow();
 
     private:
-        Ui::MainWindow ui;
+        Ui::MainWindow * ui;
+        class AboutWidget * m_about_widget;
+        QSettings * m_appsettings;
 
     private slots:
+        void on_actionAbout_triggered();
         void on_actionNew_triggered();
         void on_actionOpen_triggered();
         void on_actionSave_triggered();

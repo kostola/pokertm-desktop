@@ -320,10 +320,10 @@ void TimerView::rebuyClicked()
 #define PLAYSOUND(fileName) \
     QSound::play(fileName);
 #else
-#include <Phonon/MediaObject>
-#include <Phonon/AudioOutput>
-#include <Phonon/MediaObject>
-#include <Phonon/Path>
+#include <MediaObject>
+#include <AudioOutput>
+#include <MediaObject>
+#include <Path>
 #define PLAYSOUND(fileName) \
     Phonon::MediaObject * player = Phonon::createPlayer(Phonon::MusicCategory, Phonon::MediaSource(fileName)); \
     QObject::connect(player, SIGNAL(finished()), player, SLOT(deleteLater())); \
@@ -340,15 +340,15 @@ void TimerView::tournamentTimerTimeout()
         updateLevels();
         m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
         qDebug() << "PLAY GONG";
-        PLAYSOUND("sounds/gong.wav");
+        PLAYSOUND(":/sounds/gong.wav");
     }
     else if(m_level_time.toString("mm:ss") == "01:00") {
         qDebug() << "PLAY SCREAM";
-        PLAYSOUND("sounds/scream.wav");
+        PLAYSOUND(":/sounds/scream.wav");
     }
     else if(m_level_time.toString("mm:ss") == "00:01" || m_level_time.toString("mm:ss") == "00:02" || m_level_time.toString("mm:ss") == "00:03") {
         qDebug() << "PLAY TICK";
-        PLAYSOUND("sounds/tick.wav");
+        PLAYSOUND(":/sounds/tick.wav");
     }
 
     m_play_time = m_play_time.addSecs(1);
