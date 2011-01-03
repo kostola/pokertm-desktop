@@ -108,10 +108,10 @@ void Level::setSmallBlind(int sb)
 
 void Level::setTime(const QTime& t)
 {
-    m_time = t;
+    setTime(t.minute(), t.second());
 }
 
-void Level::setTime(int min, int sec = 0)
+void Level::setTime(int min, int sec)
 {
     m_time = QTime(0, min, sec);
 }
@@ -124,6 +124,20 @@ void Level::setType(LevelType t)
 int Level::smallBlind()
 {
     return m_smallblind;
+}
+
+QString Level::strType()
+{
+    switch(type())
+    {
+        case GameLevel:
+            return tr("Gioco");
+
+        case PauseLevel:
+            return tr("Pausa");
+    }
+
+    return tr("Sconosciuto");
 }
 
 QTime Level::time()
@@ -149,33 +163,36 @@ QString Level::toString()
     return QString("[Type:%1, Time:%2, Rebuy:%6, Ante:%3, SB:%4, BB:%5]").arg(strtype).arg(time().toString("mm:ss")).arg(ante()).arg(smallBlind()).arg(bigBlind()).arg(isRebuyEnabled()? "Y":"N");
 }
 
-LevelType Level::type()
+Level::LevelType Level::type()
 {
     return m_type;
 }
 
 // ===== CLASS "Tournament" =======================================================================
 
-Tournament::Tournament(QObject *parent)
-    : QObject(parent)
+Tournament::Tournament()
 {
-    m_chips_each = 0;
+    m_chips_each      = 0;
     m_current_players = 0;
-    m_rebuy_maxlevel = 0;
-    m_rebuy_chips = 0;
-    m_rebuys = 0;
-    m_total_players = 0;
+    m_rebuy_maxlevel  = 0;
+    m_rebuy_chips     = 0;
+    m_rebuys          = 0;
+    m_total_players   = 0;
 }
 
 Tournament::~Tournament()
 {
-    qDeleteAll(m_levels);
+//    qDeleteAll(m_levels);
+    foreach(Level *l, m_levels)
+        delete l;
 }
 
 Level* Tournament::addLevel()
 {
     Level* l = new Level;
     m_levels.append(l);
+
+    return l;
 }
 
 int Tournament::averageStack()
@@ -197,10 +214,10 @@ Level* Tournament::level(int number)
 {
     //qDebug() << this->toString();
 
-    if(number < 0 || getLevels() == 0)
+    if(number < 0 || countLevels() == 0)
         return 0;
 
-    return m_levels.at(qMin(number, getLevels() - 1));
+    return m_levels.at(qMin(number, countLevels() - 1));
 }
 
 int Tournament::countLevels()
@@ -221,6 +238,12 @@ int Tournament::rebuyChips()
 int Tournament::rebuyMaxLevel()
 {
     return m_rebuy_maxlevel;
+}
+
+void Tournament::removeLastLevel()
+{
+    Level *l = m_levels.takeLast();
+    delete l;
 }
 
 int Tournament::totalChips()
@@ -281,8 +304,9 @@ void Tournament::setRebuyMaxLevel(int l)
 QString Tournament::toString()
 {
     QString str;
-    foreach(Level* l, m_levels) {
-        str.append(QString("%1 ").arg(l->toString());
+    foreach(Level* l, m_levels)
+    {
+        str.append(QString("%1 ").arg(l->toString()));
     }
     return str;
 }

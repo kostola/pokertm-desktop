@@ -35,8 +35,11 @@
      <property name="text">
       <string/>
      </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
      <property name="pixmap">
-      <pixmap resource="data.qrc">:/data/icon.svg</pixmap>
+      <pixmap resource="data.qrc">:/data/icon.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>

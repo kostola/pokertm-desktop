@@ -20,7 +20,7 @@
 #include <QString>
 #include <QTime>
 
-class Level
+class Level : public QObject
 {
     public:
         enum LevelType
@@ -46,6 +46,7 @@ class Level
         void setTime(int min, int sec = 0);
 
         LevelType type();
+        QString strType();
         void setType(LevelType t);
 
         bool isValid();
@@ -66,15 +67,16 @@ class Level
         LevelType m_type;
 };
 
-class Tournament
+class Tournament : public QObject
 {
     public:
         Tournament();
         ~Tournament();
 
         Level* addLevel();
-        Level* level(int number);
         int countLevels();
+        Level* level(int number);
+        void removeLastLevel();
 
         int chipsEach();
         void setChipsEach(int c);

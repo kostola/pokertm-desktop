@@ -11,18 +11,21 @@ UI_DIR = .obj
 
 # Input files
 HEADERS += MainWindow.h \
-    TimerView.h \
+    #TimerView.h \
     Tournament.h \
-    AboutWidget.h
+    AboutWidget.h \
+    LevelEditDialog.h
 
 SOURCES += main.cpp \
     MainWindow.cpp \
-    TimerView.cpp \
+    #TimerView.cpp \
     Tournament.cpp \
-    AboutWidget.cpp
+    AboutWidget.cpp \
+    LevelEditDialog.cpp
 
 FORMS += MainWindow.ui \
-    AboutWidget.ui
+    AboutWidget.ui \
+    LevelEditDialog.ui
 
 RESOURCES += data.qrc
 

@@ -16,13 +16,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-//#include "ui_MainWindow.h"
-
-#include <QLineEdit>
 #include <QMainWindow>
-#include <QSettings>
-#include <QSpinBox>
-#include <QTableWidget>
 
 namespace Ui {
     class MainWindow;
@@ -37,21 +31,30 @@ class MainWindow : public QMainWindow
         ~MainWindow();
 
     private:
+        void updateGraphics(bool update_levels = true);
+
         Ui::MainWindow * ui;
-        class AboutWidget * m_about_widget;
-        QSettings * m_appsettings;
+        class AboutWidget     * m_about_widget;
+        class LevelEditDialog * m_level_editor;
+        class QSettings       * m_appsettings;
+        class Tournament      * m_tournament;
 
     private slots:
+        void handleChipsEdit();
+        void handleNameEdit();
+        void handlePlayersEdit();
+        void handleRebuyChipsEdit();
+        void handleRebuyLevEdit();
         void on_actionAbout_triggered();
         void on_actionNew_triggered();
         void on_actionOpen_triggered();
         void on_actionSave_triggered();
         void on_actionSaveAs_triggered();
-        void on_addLevel_clicked();
-        void on_remLevel_clicked();
+        void on_levelAdd_clicked();
+        void on_levelRem_clicked();
         void on_startButton_clicked();
-        void validateStart();
         void startTournament();
+        void validateStart();
 };
 
 class Chip : public QWidget
