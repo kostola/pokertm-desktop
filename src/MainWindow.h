@@ -38,13 +38,13 @@ class MainWindow : public QMainWindow
         class LevelEditDialog * m_level_editor;
         class QSettings       * m_appsettings;
         class Tournament      * m_tournament;
+        QString m_filename;
 
     private slots:
         void handleChipsEdit();
         void handleNameEdit();
         void handlePlayersEdit();
         void handleRebuyChipsEdit();
-        void handleRebuyLevEdit();
         void on_actionAbout_triggered();
         void on_actionNew_triggered();
         void on_actionOpen_triggered();

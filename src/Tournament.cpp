@@ -216,6 +216,126 @@ int Tournament::currentPlayers()
     return m_current_players;
 }
 
+bool Tournament::fromXml(const QDomDocument &xmldoc)
+{
+    bool ok;
+
+    QDomNode node_tournament = xmldoc.namedItem("tournament");
+    if(node_tournament.isNull())
+    {
+        qDebug() << "Tournament::fromXml [1]";
+        return false;
+    }
+
+    setName(node_tournament.attributes().namedItem("name").nodeValue());
+
+    int players = node_tournament.attributes().namedItem("players").nodeValue().toInt(&ok);
+    if(! ok)
+    {
+        qDebug() << "Tournament::fromXml [2]";
+        return false;
+    }
+    setTotalPlayers(players);
+
+    QDomNode node_levels = node_tournament.namedItem("levels");
+    if(node_levels.isNull())
+    {
+        qDebug() << "Tournament::fromXml [3]";
+        return false;
+    }
+
+    for(int i = 0; i < node_levels.childNodes().size(); i++)
+    {
+        QDomNode node = node_levels.childNodes().at(i);
+
+        Level *l = addLevel();
+        l->setType(node.attributes().namedItem("type").nodeValue() == "game" ? Level::GameLevel : Level::PauseLevel);
+        l->setTime(QTime::fromString(node.attributes().namedItem("time").nodeValue(), "mm:ss"));
+
+        if(l->type() == Level::GameLevel)
+        {
+            QDomNode node_ante = node.namedItem("ante");
+            if(node_ante.isNull())
+            {
+                qDebug() << "Tournament::fromXml [4]";
+                return false;
+            }
+            int ante = node_ante.attributes().namedItem("value").nodeValue().toInt(&ok);
+            if(! ok)
+            {
+                qDebug() << "Tournament::fromXml [5]";
+                return false;
+            }
+            l->setAnte(ante);
+
+            QDomNode node_sb = node.namedItem("smallblind");
+            if(node_sb.isNull())
+            {
+                qDebug() << "Tournament::fromXml [6]";
+                return false;
+            }
+            int sb = node_sb.attributes().namedItem("value").nodeValue().toInt(&ok);
+            if(! ok)
+            {
+                qDebug() << "Tournament::fromXml [7]";
+                return false;
+            }
+            l->setSmallBlind(sb);
+
+            QDomNode node_bb = node.namedItem("bigblind");
+            if(node_bb.isNull())
+            {
+                qDebug() << "Tournament::fromXml [8]";
+                return false;
+            }
+            int bb = node_bb.attributes().namedItem("value").nodeValue().toInt(&ok);
+            if(! ok)
+            {
+                qDebug() << "Tournament::fromXml [9]";
+                return false;
+            }
+            l->setBigBlind(bb);
+
+            QDomNode node_rebuy = node.namedItem("rebuy");
+            if(node_rebuy.isNull())
+            {
+                qDebug() << "Tournament::fromXml [10]";
+                return false;
+            }
+            int rebuy = node_rebuy.attributes().namedItem("value").nodeValue().toInt(&ok);
+            if(! ok)
+            {
+                qDebug() << "Tournament::fromXml [11]";
+                return false;
+            }
+            l->setRebuyEnabled(rebuy);
+        }
+    }
+
+    QDomNode node_stack = node_tournament.namedItem("stack");
+    if(node_stack.isNull())
+    {
+        qDebug() << "Tournament::fromXml [12]";
+        return false;
+    }
+    int stack_initial = node_stack.attributes().namedItem("initial").nodeValue().toInt(&ok);
+    if(! ok)
+    {
+        qDebug() << "Tournament::fromXml [13]";
+        return false;
+    }
+    setChipsEach(stack_initial);
+    int stack_rebuy = node_stack.attributes().namedItem("rebuy").nodeValue().toInt(&ok);
+    if(! ok)
+    {
+        qDebug() << "Tournament::fromXml [14]";
+        return false;
+    }
+    setRebuyChips(stack_rebuy);
+
+    return true;
+}
+
 Level* Tournament::level(int number)
 {
     //qDebug() << this->toString();
@@ -340,4 +460,48 @@ QString Tournament::toString()
         str.append(QString("%1 ").arg(l->toString()));
     }
     return str;
+}
+
+void Tournament::toXml(QDomDocument &xmldoc)
+{
+    QDomElement el_tournament = xmldoc.createElement("tournament");
+    el_tournament.setTagName("tournament");
+    el_tournament.setAttribute("name", name());
+    el_tournament.setAttribute("players", totalPlayers());
+    xmldoc.appendChild(el_tournament);
+
+    QDomElement el_levels = xmldoc.createElement("levels");
+    el_tournament.appendChild(el_levels);
+
+    for(int i = 0; i < countLevels(); i++)
+    {
+        QDomElement el_lev = xmldoc.createElement("level");
+        el_lev.setAttribute("type", level(i)->type() == Level::GameLevel ? "game" : "pause");
+        el_lev.setAttribute("time", level(i)->time().toString("mm:ss"));
+        el_levels.appendChild(el_lev);
+
+        if(level(i)->type() == Level::GameLevel)
+        {
+            QDomElement el_ante = xmldoc.createElement("ante");
+            el_ante.setAttribute("value", level(i)->ante());
+            el_lev.appendChild(el_ante);
+
+            QDomElement el_smallblind = xmldoc.createElement("smallblind");
+            el_smallblind.setAttribute("value", level(i)->smallBlind());
+            el_lev.appendChild(el_smallblind);
+
+            QDomElement el_bigblind = xmldoc.createElement("bigblind");
+            el_bigblind.setAttribute("value", level(i)->bigBlind());
+            el_lev.appendChild(el_bigblind);
+
+            QDomElement el_levrebuy = xmldoc.createElement("rebuy");
+            el_levrebuy.setAttribute("value", level(i)->isRebuyEnabled());
+            el_lev.appendChild(el_levrebuy);
+        }
+    }
+
+    QDomElement el_stack = xmldoc.createElement("stack");
+    el_stack.setAttribute("initial", chipsEach());
+    el_stack.setAttribute("rebuy", rebuyChips());
+    el_tournament.appendChild(el_stack);
 }

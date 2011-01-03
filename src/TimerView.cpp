@@ -16,6 +16,8 @@
 
 #include <QtGui>
 
+#include "Global.h"
+
 #define FONT_NAME "Helvetica"
 #define MARGIN 5.0
 #define SCREEN_WIDTH  1276.0
@@ -217,7 +219,7 @@ TimerView::TimerView(Tournament *t)
     box_next_blinds = QRectF(SIDEBANDS_WIDTH + MARGIN, box_ante.bottom(), SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 2.0);
     box_next_ante   = QRectF(SIDEBANDS_WIDTH + MARGIN, box_next_blinds.top() + box_next_blinds.height() * 0.85, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 1.5);
 
-    m_txt_name = scene->addText(m_tournament->getName(), QFont(FONT_NAME));
+    m_txt_name = scene->addText(m_tournament->name(), QFont(FONT_NAME));
     m_txt_name->setDefaultTextColor(Qt::white);
     setFontSizeAndCenter(m_txt_name, box_name);
 
@@ -225,7 +227,7 @@ TimerView::TimerView(Tournament *t)
     m_txt_timer->setDefaultTextColor(Qt::red);
     setFontSizeAndCenter(m_txt_timer, box_timer);
 
-    m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+    m_level_time = m_tournament->level(m_current_level)->time();
     m_play_time = QTime(0,0,0,0);
     m_txt_timer->setPlainText(m_level_time.toString("mm:ss"));
 
@@ -259,7 +261,7 @@ void TimerView::nextClicked()
 {
     m_current_level++;
     updateLevels();
-    m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+    m_level_time = m_tournament->level(m_current_level)->time();
     updatePlayTimes();
     if(! m_paused)
         m_tournament_timer->start(1000);
@@ -301,7 +303,7 @@ void TimerView::prevClicked()
 
     m_current_level--;
     updateLevels();
-    m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+    m_level_time = m_tournament->level(m_current_level)->time();
     updatePlayTimes();
     if(! m_paused)
         m_tournament_timer->start(1000);
@@ -315,21 +317,6 @@ void TimerView::rebuyClicked()
     updateTotalChips();
 }
 
-#ifdef USE_QSOUND
-#include <QSound>
-#define PLAYSOUND(fileName) \
-    QSound::play(fileName);
-#else
-#include <MediaObject>
-#include <AudioOutput>
-#include <MediaObject>
-#include <Path>
-#define PLAYSOUND(fileName) \
-    Phonon::MediaObject * player = Phonon::createPlayer(Phonon::MusicCategory, Phonon::MediaSource(fileName)); \
-    QObject::connect(player, SIGNAL(finished()), player, SLOT(deleteLater())); \
-    player->play();
-#endif
-
 void TimerView::tournamentTimerTimeout()
 {
     m_level_time = m_level_time.addSecs(-1);
@@ -338,7 +325,7 @@ void TimerView::tournamentTimerTimeout()
         // cambio livello
         m_current_level++;
         updateLevels();
-        m_level_time = QTime(0, m_tournament->getLevel(m_current_level).time_minutes, 0, 0);
+        m_level_time = m_tournament->level(m_current_level)->time();
         qDebug() << "PLAY GONG";
         PLAYSOUND(":/sounds/gong.wav");
     }
@@ -358,7 +345,7 @@ void TimerView::tournamentTimerTimeout()
 
 void TimerView::updateAverageStack()
 {
-    m_txt_avgstack->setPlainText(addNumberPoints(QString::number(m_tournament->getAverageStack())));
+    m_txt_avgstack->setPlainText(addNumberPoints(QString::number(m_tournament->averageStack())));
     setFontSizeAndCenter(m_txt_avgstack, box_2);
 }
 
@@ -369,22 +356,44 @@ void TimerView::updateCurrentTime()
 
 void TimerView::updateLevels()
 {
-    m_txt_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->getLevel(m_current_level).smallblind).arg(m_tournament->getLevel(m_current_level).bigblind));
-    setFontSizeAndCenter(m_txt_blinds, box_blinds);
+    if(m_tournament->level(m_current_level)->type() == Level::GameLevel)
+    {
+        m_txt_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->level(m_current_level)->smallBlind()).arg(m_tournament->level(m_current_level)->bigBlind()));
+        setFontSizeAndCenter(m_txt_blinds, box_blinds);
 
-    m_txt_ante->setPlainText(QString("Ante: %1").arg(m_tournament->getLevel(m_current_level).ante));
-    setFontSizeAndCenter(m_txt_ante, box_ante);
+        m_txt_ante->setPlainText(QString("Ante: %1").arg(m_tournament->level(m_current_level)->ante()));
+        setFontSizeAndCenter(m_txt_ante, box_ante);
+    }
+    else
+    {
+        m_txt_blinds->setPlainText(tr("PAUSA"));
+        setFontSizeAndCenter(m_txt_blinds, box_blinds);
 
-    m_txt_next_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->getLevel(m_current_level + 1).smallblind).arg(m_tournament->getLevel(m_current_level + 1).bigblind));
-    setFontSizeAndCenter(m_txt_next_blinds, box_next_blinds);
+        m_txt_ante->setPlainText("");
+        setFontSizeAndCenter(m_txt_ante, box_ante);
+    }
 
-    m_txt_next_ante->setPlainText(QString("Ante: %1").arg(m_tournament->getLevel(m_current_level + 1).ante));
-    setFontSizeAndCenter(m_txt_next_ante, box_next_ante);
+    if(m_tournament->level(m_current_level + 1)->type() == Level::GameLevel)
+    {
+        m_txt_next_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->level(m_current_level + 1)->smallBlind()).arg(m_tournament->level(m_current_level + 1)->bigBlind()));
+        setFontSizeAndCenter(m_txt_next_blinds, box_next_blinds);
+
+        m_txt_next_ante->setPlainText(QString("Ante: %1").arg(m_tournament->level(m_current_level + 1)->ante()));
+        setFontSizeAndCenter(m_txt_next_ante, box_next_ante);
+    }
+    else
+    {
+        m_txt_next_blinds->setPlainText(tr("PAUSA"));
+        setFontSizeAndCenter(m_txt_next_blinds, box_next_blinds);
+
+        m_txt_next_ante->setPlainText("");
+        setFontSizeAndCenter(m_txt_next_ante, box_next_ante);
+    }
 }
 
 void TimerView::updatePlayers()
 {
-    m_txt_players->setPlainText(QString("%1/%2").arg(m_tournament->getCurrentPlayers()).arg(m_tournament->getTotalPlayers()));
+    m_txt_players->setPlainText(QString("%1/%2").arg(m_tournament->currentPlayers()).arg(m_tournament->totalPlayers()));
     setFontSizeAndCenter(m_txt_players, box_1);
 }
 
@@ -396,6 +405,6 @@ void TimerView::updatePlayTimes()
 
 void TimerView::updateTotalChips()
 {
-    m_txt_totchips->setPlainText(addNumberPoints(QString::number(m_tournament->getTotalChips())));
+    m_txt_totchips->setPlainText(addNumberPoints(QString::number(m_tournament->totalChips())));
     setFontSizeAndCenter(m_txt_totchips, box_3);
 }

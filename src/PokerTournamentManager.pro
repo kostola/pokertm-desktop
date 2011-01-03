@@ -11,14 +11,15 @@ UI_DIR = .obj
 
 # Input files
 HEADERS += MainWindow.h \
-    #TimerView.h \
+    TimerView.h \
     Tournament.h \
     AboutWidget.h \
-    LevelEditDialog.h
+    LevelEditDialog.h \
+    Global.h
 
 SOURCES += main.cpp \
     MainWindow.cpp \
-    #TimerView.cpp \
+    TimerView.cpp \
     Tournament.cpp \
     AboutWidget.cpp \
     LevelEditDialog.cpp

@@ -15,6 +15,7 @@
 #ifndef TOURNAMENT_H
 #define TOURNAMENT_H
 
+#include <QDomDocument>
 #include <QList>
 #include <QObject>
 #include <QString>
@@ -105,6 +106,9 @@ class Tournament : public QObject
         void rebuy(int currentLevel);
 
         QString toString();
+
+        bool fromXml(const QDomDocument& xmldoc);
+        void toXml(QDomDocument& xmldoc);
 
     private:
         QString m_name;

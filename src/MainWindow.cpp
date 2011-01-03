@@ -24,8 +24,9 @@
 #include <QTableWidgetItem>
 
 #include "AboutWidget.h"
+#include "Global.h"
 #include "LevelEditDialog.h"
-//#include "TimerView.h"
+#include "TimerView.h"
 #include "Tournament.h"
 
 //#if QT_VERSION >= 0x040600
@@ -85,14 +86,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tourneyName,    SIGNAL(textChanged(QString)), this, SLOT(validateStart()));
     connect(ui->spinPlayers,    SIGNAL(valueChanged(int)),    this, SLOT(validateStart()));
     connect(ui->spinChips,      SIGNAL(valueChanged(int)),    this, SLOT(validateStart()));
-//    connect(ui->spinRebuyLev,   SIGNAL(valueChanged(int)),    this, SLOT(validateStart()));
     connect(ui->spinRebuyChips, SIGNAL(valueChanged(int)),    this, SLOT(validateStart()));
 
     connect(ui->tourneyName,    SIGNAL(editingFinished()), this, SLOT(handleNameEdit()));
     connect(ui->spinChips,      SIGNAL(editingFinished()), this, SLOT(handleChipsEdit()));
     connect(ui->spinPlayers,    SIGNAL(editingFinished()), this, SLOT(handlePlayersEdit()));
     connect(ui->spinRebuyChips, SIGNAL(editingFinished()), this, SLOT(handleRebuyChipsEdit()));
-//    connect(ui->spinRebuyLev,   SIGNAL(editingFinished()), this, SLOT(handleRebuyLevEdit()));
 
     m_about_widget = new AboutWidget;
     m_level_editor = new LevelEditDialog;
@@ -152,22 +151,10 @@ void MainWindow::handleRebuyChipsEdit()
     validateStart();
 }
 
-void MainWindow::handleRebuyLevEdit()
-{
-    if(! m_tournament)
-        return;
-
-//    m_tournament->setRebuyMaxLevel(ui->spinRebuyLev->value());
-    qDebug() << "Tournament Rebuy Level:" << m_tournament->rebuyMaxLevel();
-    validateStart();
-}
-
 void MainWindow::on_actionAbout_triggered()
 {
     int pos_x = frameGeometry().x() + (frameGeometry().width() - m_about_widget->frameGeometry().width()) / 2;
     int pos_y = frameGeometry().y() + (frameGeometry().height() - m_about_widget->frameGeometry().height()) / 2;
-
-//    qDebug() << "New Pos is" << pos_x << pos_y;
 
     m_about_widget->move(pos_x, pos_y);
 
@@ -196,20 +183,64 @@ void MainWindow::on_actionNew_triggered()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    on_actionNew_triggered();
+    if(m_tournament)
+    {
+        if(QMessageBox::question(this, tr("Apri"), tr("Vuoi salvare il torneo attuale prima di cancellarlo?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+            on_actionSaveAs_triggered();
+        }
 
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Apri"), QDir::homePath(), tr("Poker Tournament (*.pkt)"));
-    if(fileName.isNull())
-        return;
+        delete m_tournament;
+        m_tournament = 0;
+    }
 
-    QFile file(fileName);
-    if(! (file.exists() && file.open(QIODevice::ReadOnly))) {
-        qDebug() << "Wrong file!";
+    QString fn = QFileDialog::getOpenFileName(this, tr("Apri"), QDir::homePath(), tr("Poker Tournament (*.pkt)"));
+    if(fn.isNull())
+    {
+        on_actionNew_triggered();
         return;
     }
 
-    QDomDocument doc("xml-pokertimer");
+    QFile file(fn);
+    if(! (file.exists() && file.open(QIODevice::ReadOnly)))
+    {
+        QMessageBox::warning(this, tr("Apri"), tr("Impossibile aprire il file."), QMessageBox::Ok);
+        on_actionNew_triggered();
+        return;
+    }
+
+    QDomDocument doc;
     doc.setContent(&file);
+
+    if(doc.doctype().name() != PTM_XML_DOCTYPE)
+    {
+        QMessageBox::warning(this, tr("Apri"), tr("Errore nel formato del file."), QMessageBox::Ok);
+        on_actionNew_triggered();
+        return;
+    }
+
+    QDomNodeList nodelist = doc.elementsByTagName("poker-tournament-manager");
+    if(nodelist.size() != 1 || nodelist.at(0).attributes().namedItem("swversion").nodeValue() != PTM_VERSION || nodelist.at(0).attributes().namedItem("xmlversion").nodeValue() != PTM_XML_VERSION)
+    {
+        QMessageBox::warning(this, tr("Apri"), tr("Errore nella versione del file."), QMessageBox::Ok);
+        on_actionNew_triggered();
+        return;
+    }
+
+    m_tournament = new Tournament;
+    if(! m_tournament->fromXml(doc))
+    {
+        QMessageBox::warning(this, tr("Apri"), tr("Errore nella lettura del file."), QMessageBox::Ok);
+
+        delete m_tournament;
+        m_tournament = 0;
+
+        on_actionNew_triggered();
+        return;
+    }
+
+    m_filename = fn;
+    updateGraphics();
+    return;
 
     QDomNode node_tournament = doc.childNodes().at(0);
     ui->tourneyName->setText(node_tournament.attributes().namedItem("name").nodeValue());
@@ -245,46 +276,36 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
-    on_actionSaveAs_triggered();
+    if(m_filename.isNull() || m_filename.isEmpty())
+    {
+        on_actionSaveAs_triggered();
+        return;
+    }
+
+    QDomDocument doc(PTM_XML_DOCTYPE);
+    QDomElement el_sw = doc.createElement("poker-tournament-manager");
+    el_sw.setAttribute("swversion", PTM_VERSION);
+    el_sw.setAttribute("xmlversion", PTM_XML_VERSION);
+    doc.appendChild(el_sw);
+    m_tournament->toXml(doc);
+
+    QFile file(m_filename);
+    file.open(QIODevice::WriteOnly);
+    file.write(doc.toByteArray());
+    file.close();
 }
 
 void MainWindow::on_actionSaveAs_triggered()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Salva come..."), QDir::homePath(), tr("Poker Tournament (*.pkt)"));
-    if(fileName.isNull())
+    QString fn = QFileDialog::getSaveFileName(this, tr("Salva come..."), QDir::homePath(), tr("Poker Tournament (*.pkt)"));
+    if(fn.isNull() || fn.isEmpty())
         return;
 
-    QDomDocument doc("xml-pokertimer");
-    QDomElement el_tournament = doc.createElement("tournament");
-    el_tournament.setAttribute("name", ui->tourneyName->text());
-    doc.appendChild(el_tournament);
+    m_filename = fn;
+    if(! m_filename.endsWith(".pkt"))
+        m_filename.append(".pkt");
 
-    QDomElement el_levels = doc.createElement("levels");
-    el_tournament.appendChild(el_levels);
-
-    for(int i = 0; i < ui->tableLevels->rowCount(); i++) {
-        QDomElement el_lev = doc.createElement("level");
-        el_lev.setAttribute("time", ui->tableLevels->item(i,0)->text());
-        el_lev.setAttribute("ante", ui->tableLevels->item(i,1)->text());
-        el_lev.setAttribute("smallblind", ui->tableLevels->item(i,2)->text());
-        el_lev.setAttribute("bigblind", ui->tableLevels->item(i,3)->text());
-        el_levels.appendChild(el_lev);
-    }
-
-    QDomElement el_players = doc.createElement("players");
-    el_players.setAttribute("number", QString::number(ui->spinPlayers->value()));
-    el_players.setAttribute("chipseach", QString::number(ui->spinChips->value()));
-    el_tournament.appendChild(el_players);
-
-    QDomElement el_rebuy = doc.createElement("rebuy");
-//    el_rebuy.setAttribute("maxlevel", QString::number(ui->spinRebuyLev->value()));
-    el_rebuy.setAttribute("chips", QString::number(ui->spinRebuyChips->value()));
-    el_tournament.appendChild(el_rebuy);
-
-    QFile file(fileName);
-    file.open(QIODevice::WriteOnly);
-    file.write(doc.toByteArray());
-    file.close();
+    on_actionSave_triggered();
 }
 
 void MainWindow::on_levelAdd_clicked()
@@ -448,26 +469,8 @@ void MainWindow::validateStart()
 
 void MainWindow::startTournament()
 {
-    Tournament *tournament = new Tournament();
-    tournament->setName(ui->tourneyName->text());
-    tournament->setCurrentPlayers(ui->spinPlayers->value());
-    tournament->setTotalPlayers(ui->spinPlayers->value());
-    tournament->setChipsEach(ui->spinChips->value());
-//    tournament->setRebuyMaxLevel(ui->spinRebuyLev->value());
-    tournament->setRebuyChips(ui->spinRebuyChips->value());
-
-    for (int i = 0; i < ui->tableLevels->rowCount(); i++) {
-//        Tournament::Level level;
-//        level.time_minutes = QVariant(ui->tableLevels->item(i,0)->text()).toInt();
-//        level.ante = QVariant(ui->tableLevels->item(i,1)->text()).toInt();
-//        level.smallblind = QVariant(ui->tableLevels->item(i,2)->text()).toInt();
-//        level.bigblind = QVariant(ui->tableLevels->item(i,3)->text()).toInt();
-//        tournament->addLevel(level);
-//        //qDebug() << "Livello" << i << "-" << level.time_minutes << level.ante << level.smallblind << level.bigblind;
-    }
-
-//    TimerView *tv = new TimerView(tournament);
-//    tv->setAttribute(Qt::WA_DeleteOnClose);
-//    tv->setWindowState(Qt::WindowFullScreen);
-//    tv->show();
+    TimerView *tv = new TimerView(m_tournament);
+    tv->setAttribute(Qt::WA_DeleteOnClose);
+    tv->setWindowState(Qt::WindowFullScreen);
+    tv->show();
 }
