@@ -157,7 +157,7 @@ TimerView::TimerView(Tournament *t)
 
     // creating lower buttons
     m_pb_play = new QPushButton();
-    m_pb_play->setIcon(QIcon(":/data/icon_play.svg"));
+    m_pb_play->setIcon(QIcon(":/data/icon_play.png"));
     m_pb_play->setIconSize(QSize(button_size * 0.9, button_size * 0.9));
     QPalette pal = m_pb_play->palette();
     pal.setColor(QPalette::Window, Qt::black);
@@ -171,7 +171,7 @@ TimerView::TimerView(Tournament *t)
     lay_buttons->addItem(pb_play_item);
 
     m_pb_prev = new QPushButton();
-    m_pb_prev->setIcon(QIcon(":/data/icon_prev.svg"));
+    m_pb_prev->setIcon(QIcon(":/data/icon_prev.png"));
     m_pb_prev->setIconSize(QSize(button_size * 0.9, button_size * 0.9));
     m_pb_prev->setPalette(pal);
     m_pb_prev->setFlat(true);
@@ -181,7 +181,7 @@ TimerView::TimerView(Tournament *t)
     lay_buttons->addItem(pb_prev_item);
 
     m_pb_next = new QPushButton();
-    m_pb_next->setIcon(QIcon(":/data/icon_next.svg"));
+    m_pb_next->setIcon(QIcon(":/data/icon_next.png"));
     m_pb_next->setIconSize(QSize(button_size * 0.9, button_size * 0.9));
     m_pb_next->setPalette(pal);
     m_pb_next->setFlat(true);
@@ -191,7 +191,7 @@ TimerView::TimerView(Tournament *t)
     lay_buttons->addItem(pb_next_item);
 
     m_pb_playerout = new QPushButton();
-    m_pb_playerout->setIcon(QIcon(":/data/icon_plout.svg"));
+    m_pb_playerout->setIcon(QIcon(":/data/icon_plout.png"));
     m_pb_playerout->setIconSize(QSize(button_size * 0.9, button_size * 0.9));
     m_pb_playerout->setPalette(pal);
     m_pb_playerout->setFlat(true);
@@ -201,7 +201,7 @@ TimerView::TimerView(Tournament *t)
     lay_buttons->addItem(pb_playerout_item);
 
     m_pb_rebuy = new QPushButton();
-    m_pb_rebuy->setIcon(QIcon(":/data/icon_rebuy.svg"));
+    m_pb_rebuy->setIcon(QIcon(":/data/icon_rebuy.png"));
     m_pb_rebuy->setIconSize(QSize(button_size * 0.9, button_size * 0.9));
     m_pb_rebuy->setPalette(pal);
     m_pb_rebuy->setFlat(true);
@@ -211,7 +211,7 @@ TimerView::TimerView(Tournament *t)
     lay_buttons->addItem(pb_rebuy_item);
 
     m_pb_minimize = new QPushButton();
-    m_pb_minimize->setIcon(QIcon(":/data/icon_minimize.svg"));
+    m_pb_minimize->setIcon(QIcon(":/data/icon_minimize.png"));
     m_pb_minimize->setIconSize(QSize(button_size * 0.9, button_size * 0.9));
     m_pb_minimize->setPalette(pal);
     m_pb_minimize->setFlat(true);
@@ -221,7 +221,7 @@ TimerView::TimerView(Tournament *t)
     lay_buttons->addItem(pb_minimize_item);
 
     m_pb_close = new QPushButton();
-    m_pb_close->setIcon(QIcon(":/data/icon_close.svg"));
+    m_pb_close->setIcon(QIcon(":/data/icon_close.png"));
     m_pb_close->setIconSize(QSize(button_size * 0.9, button_size * 0.9));
     m_pb_close->setPalette(pal);
     m_pb_close->setFlat(true);
@@ -335,13 +335,13 @@ void TimerView::handlePlayClicked()
         m_txt_timer->setDefaultTextColor(Qt::white);
         m_txt_timer->update(m_txt_timer->boundingRect());
         m_tournament_timer->start(1000);
-        m_pb_play->setIcon(QIcon(":/data/icon_pause.svg"));
+        m_pb_play->setIcon(QIcon(":/data/icon_pause.png"));
         m_paused = false;
     }
     else
     {
         m_paused = true;
-        m_pb_play->setIcon(QIcon(":/data/icon_play.svg"));
+        m_pb_play->setIcon(QIcon(":/data/icon_play.png"));
         m_tournament_timer->stop();
         m_txt_timer->setDefaultTextColor(Qt::red);
         m_txt_timer->update(m_txt_timer->boundingRect());
@@ -425,7 +425,7 @@ void TimerView::updateGraphics(int what)
             m_txt_ante->setPlainText(QString("Ante: %1").arg(m_tournament->currentLevel()->ante()));
             setFontSizeAndCenter(m_txt_ante, box_ante);
 
-            m_pb_rebuy->setIcon(QIcon(QString(":/data/icon_rebuy%1.svg").arg(m_tournament->currentLevel()->isRebuyEnabled() ? "" : "_locked")));
+            m_pb_rebuy->setIcon(QIcon(QString(":/data/icon_rebuy%1.png").arg(m_tournament->currentLevel()->isRebuyEnabled() ? "" : "_locked")));
         }
         else
         {
@@ -435,7 +435,7 @@ void TimerView::updateGraphics(int what)
             m_txt_ante->setPlainText("RELAX");
             setFontSizeAndCenter(m_txt_ante, box_ante);
 
-            m_pb_rebuy->setIcon(QIcon(":/data/icon_rebuy_locked.svg"));
+            m_pb_rebuy->setIcon(QIcon(":/data/icon_rebuy_locked.png"));
         }
 
         if(m_tournament->nextLevel()->type() == Level::GameLevel)
