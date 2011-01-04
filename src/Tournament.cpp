@@ -178,7 +178,6 @@ Tournament::Tournament()
 {
     m_chips_each      = 0;
     m_current_players = 0;
-    m_rebuy_maxlevel  = 0;
     m_rebuy_chips     = 0;
     m_rebuys          = 0;
     m_total_players   = 0;
@@ -385,11 +384,6 @@ int Tournament::rebuyChips()
     return m_rebuy_chips;
 }
 
-int Tournament::rebuyMaxLevel()
-{
-    return m_rebuy_maxlevel;
-}
-
 void Tournament::removeLevel(int pos)
 {
     if(pos < 0 || pos >= m_levels.size() - 1)
@@ -415,7 +409,6 @@ int Tournament::totalPlayers()
 }
 
 void Tournament::playerOut()
-
 {
     if(m_current_players > 1)
         m_current_players--;
@@ -423,7 +416,7 @@ void Tournament::playerOut()
 
 void Tournament::rebuy(int currentLevel)
 {
-    if(currentLevel >= m_rebuy_maxlevel || m_current_players == m_total_players)
+    if(m_levels.size() >= currentLevel || m_levels.at(currentLevel)->type() == Level::PauseLevel || !m_levels.at(currentLevel)->isRebuyEnabled() || m_current_players == m_total_players)
         return;
 
     m_current_players++;
@@ -454,11 +447,6 @@ void Tournament::setTotalPlayers(int tp)
 void Tournament::setRebuyChips(int c)
 {
     m_rebuy_chips = c;
-}
-
-void Tournament::setRebuyMaxLevel(int l)
-{
-    m_rebuy_maxlevel = l;
 }
 
 QString Tournament::toString()

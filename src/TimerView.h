@@ -18,6 +18,7 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsView>
 #include <QObject>
+#include <QPushButton>
 #include <QRectF>
 #include <QTime>
 #include <QTimer>
@@ -32,6 +33,9 @@ class TimerView : public QGraphicsView
         TimerView(Tournament *t);
 
     private:
+        void goToNextLevel();
+        void goToPrevLevel();
+
         Tournament *m_tournament;
 
         bool m_paused;
@@ -72,12 +76,20 @@ class TimerView : public QGraphicsView
         QGraphicsTextItem *m_txt_next_blinds;
         QGraphicsTextItem *m_txt_next_ante;
 
+        QPushButton *m_pb_close;
+        QPushButton *m_pb_minimize;
+        QPushButton *m_pb_next;
+        QPushButton *m_pb_play;
+        QPushButton *m_pb_playerout;
+        QPushButton *m_pb_prev;
+        QPushButton *m_pb_rebuy;
+
     private slots:
-        void nextClicked();
-        void playClicked();
-        void playerOutClicked();
-        void prevClicked();
-        void rebuyClicked();
+        void handleNextClicked();
+        void handlePlayClicked();
+        void handlePlayerOutClicked();
+        void handlePrevClicked();
+        void handleRebuyClicked();
         void tournamentTimerTimeout();
         void updateAverageStack();
         void updateCurrentTime();

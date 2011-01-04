@@ -283,7 +283,11 @@ QPushButton:enabled {
             <string>Rimuovi Livello selezionato</string>
            </property>
            <property name="text">
-            <string>^</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="data.qrc">
+             <normaloff>:/data/arrow_up.png</normaloff>:/data/arrow_up.png</iconset>
            </property>
           </widget>
          </item>
@@ -312,7 +316,11 @@ QPushButton:enabled {
             <string>Rimuovi Livello selezionato</string>
            </property>
            <property name="text">
-            <string>v</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="data.qrc">
+             <normaloff>:/data/arrow_down.png</normaloff>:/data/arrow_down.png</iconset>
            </property>
           </widget>
          </item>

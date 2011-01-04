@@ -12,5 +12,16 @@
         <file>data/icon.svg</file>
         <file>data/flag_EN.jpg</file>
         <file>data/flag_IT.jpg</file>
+        <file>data/arrow_down.png</file>
+        <file>data/arrow_up.png</file>
+        <file>data/icon_pause.svg</file>
+        <file>data/icon_play.svg</file>
+        <file>data/icon_next.svg</file>
+        <file>data/icon_prev.svg</file>
+        <file>data/icon_plout.svg</file>
+        <file>data/icon_rebuy.svg</file>
+        <file>data/icon_rebuy_locked.svg</file>
+        <file>data/icon_minimize.svg</file>
+        <file>data/icon_close.svg</file>
     </qresource>
 </RCC>

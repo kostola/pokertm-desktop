@@ -93,9 +93,6 @@ class Tournament : public QObject
         int rebuyChips();
         void setRebuyChips(int c);
 
-        int rebuyMaxLevel();
-        void setRebuyMaxLevel(int l);
-
         int totalPlayers();
         void setTotalPlayers(int tp);
 
@@ -115,7 +112,6 @@ class Tournament : public QObject
         QList<Level*> m_levels;
         int m_chips_each;
         int m_current_players;
-        int m_rebuy_maxlevel;
         int m_rebuy_chips;
         int m_rebuys;
         int m_total_players;
