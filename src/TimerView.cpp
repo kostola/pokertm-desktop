@@ -15,14 +15,12 @@
 #include "TimerView.h"
 
 #include <QtGui>
+#include <QApplication>
 
 #include "Global.h"
 
-#define FONT_NAME "Helvetica"
 #define MARGIN 5.0
-#define SCREEN_WIDTH  1276.0
-#define SCREEN_HEIGHT 796.0
-#define SIDEBANDS_WIDTH 300.0
+#define FONT_NAME "Helvetica"
 #define TITLE_FONT QFont(FONT_NAME, 28)
 
 QString addNumberPoints(const QString& n)
@@ -67,16 +65,20 @@ TimerView::TimerView(Tournament *t)
     , m_paused(true)
     , m_current_level(0)
 {
+    m_screen_width = ((double)QApplication::desktop()->geometry().width()) - 4.0;
+    m_screen_height = ((double)QApplication::desktop()->geometry().height()) - 4.0;
+    m_sidebands_width = m_screen_width / 4.0 * 0.9;
+
     QGraphicsScene *scene = new QGraphicsScene();
     scene->setBackgroundBrush(QBrush(Qt::black));
 
     QPen pen_white(QBrush(Qt::white), 3.0);
-    /*QGraphicsLineItem *l_v1 = */scene->addLine(SIDEBANDS_WIDTH, 0.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT, pen_white);
-    /*QGraphicsLineItem *l_v2 = */scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, 0.0, SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT, pen_white);
-    /*QGraphicsLineItem *l_h1 = */scene->addLine(0.0, SCREEN_HEIGHT / 3.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0, pen_white);
-    /*QGraphicsLineItem *l_h2 = */scene->addLine(0.0, SCREEN_HEIGHT / 3.0 * 2.0, SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, pen_white);
-    /*QGraphicsLineItem *l_h3 = */scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0, SCREEN_WIDTH, SCREEN_HEIGHT / 3.0, pen_white);
-    /*QGraphicsLineItem *l_h4 = */scene->addLine(SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, SCREEN_WIDTH, SCREEN_HEIGHT / 3.0 * 2.0, pen_white);
+    /*QGraphicsLineItem *l_v1 = */scene->addLine(m_sidebands_width, 0.0, m_sidebands_width, m_screen_height, pen_white);
+    /*QGraphicsLineItem *l_v2 = */scene->addLine(m_screen_width - m_sidebands_width, 0.0, m_screen_width - m_sidebands_width, m_screen_height, pen_white);
+    /*QGraphicsLineItem *l_h1 = */scene->addLine(0.0, m_screen_height / 3.0, m_sidebands_width, m_screen_height / 3.0, pen_white);
+    /*QGraphicsLineItem *l_h2 = */scene->addLine(0.0, m_screen_height / 3.0 * 2.0, m_sidebands_width, m_screen_height / 3.0 * 2.0, pen_white);
+    /*QGraphicsLineItem *l_h3 = */scene->addLine(m_screen_width - m_sidebands_width, m_screen_height / 3.0, m_screen_width, m_screen_height / 3.0, pen_white);
+    /*QGraphicsLineItem *l_h4 = */scene->addLine(m_screen_width - m_sidebands_width, m_screen_height / 3.0 * 2.0, m_screen_width, m_screen_height / 3.0 * 2.0, pen_white);
 
     QGraphicsTextItem *txt_1 = scene->addText(tr("Giocatori"), TITLE_FONT);
     txt_1->setDefaultTextColor(Qt::white);
@@ -91,22 +93,22 @@ TimerView::TimerView(Tournament *t)
     QGraphicsTextItem *txt_6 = scene->addText(tr("Ora"), TITLE_FONT);
     txt_6->setDefaultTextColor(Qt::white);
 
-    txt_1->setPos(calcHCenter(txt_1, 0.0, SIDEBANDS_WIDTH), 0.0);
-    txt_2->setPos(calcHCenter(txt_2, 0.0, SIDEBANDS_WIDTH), SCREEN_HEIGHT / 3.0);
-    txt_3->setPos(calcHCenter(txt_3, 0.0, SIDEBANDS_WIDTH), SCREEN_HEIGHT / 3.0 * 2.0);
-    txt_4->setPos(calcHCenter(txt_4, SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_WIDTH), 0.0);
-    txt_5->setPos(calcHCenter(txt_5, SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_WIDTH), SCREEN_HEIGHT / 3.0);
-    txt_6->setPos(calcHCenter(txt_6, SCREEN_WIDTH - SIDEBANDS_WIDTH, SCREEN_WIDTH), SCREEN_HEIGHT / 3.0 * 2.0);
+    txt_1->setPos(calcHCenter(txt_1, 0.0, m_sidebands_width), 0.0);
+    txt_2->setPos(calcHCenter(txt_2, 0.0, m_sidebands_width), m_screen_height / 3.0);
+    txt_3->setPos(calcHCenter(txt_3, 0.0, m_sidebands_width), m_screen_height / 3.0 * 2.0);
+    txt_4->setPos(calcHCenter(txt_4, m_screen_width - m_sidebands_width, m_screen_width), 0.0);
+    txt_5->setPos(calcHCenter(txt_5, m_screen_width - m_sidebands_width, m_screen_width), m_screen_height / 3.0);
+    txt_6->setPos(calcHCenter(txt_6, m_screen_width - m_sidebands_width, m_screen_width), m_screen_height / 3.0 * 2.0);
 
-    qreal sidebands_box_w = SIDEBANDS_WIDTH - 2.0 * MARGIN;
-    qreal sidebands_box_h = SCREEN_HEIGHT / 3.0 - txt_1->boundingRect().height() - 2.0 * MARGIN;
+    qreal sidebands_box_w = m_sidebands_width - 2.0 * MARGIN;
+    qreal sidebands_box_h = m_screen_height / 3.0 - txt_1->boundingRect().height() - 2.0 * MARGIN;
 
     box_1 = QRectF(MARGIN, txt_1->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    box_2 = QRectF(MARGIN, SCREEN_HEIGHT / 3.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    box_3 = QRectF(MARGIN, SCREEN_HEIGHT / 3.0 * 2.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    box_4 = QRectF(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, txt_1->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    box_5 = QRectF(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, SCREEN_HEIGHT / 3.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
-    box_6 = QRectF(SCREEN_WIDTH - SIDEBANDS_WIDTH + MARGIN, SCREEN_HEIGHT / 3.0 * 2.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_2 = QRectF(MARGIN, m_screen_height / 3.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_3 = QRectF(MARGIN, m_screen_height / 3.0 * 2.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_4 = QRectF(m_screen_width - m_sidebands_width + MARGIN, txt_1->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_5 = QRectF(m_screen_width - m_sidebands_width + MARGIN, m_screen_height / 3.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
+    box_6 = QRectF(m_screen_width - m_sidebands_width + MARGIN, m_screen_height / 3.0 * 2.0 + txt_2->boundingRect().height() + MARGIN, sidebands_box_w, sidebands_box_h);
 
     m_txt_players = scene->addText("", QFont(FONT_NAME));
     m_txt_players->setDefaultTextColor(Qt::white);
@@ -132,7 +134,7 @@ TimerView::TimerView(Tournament *t)
     m_txt_time->setDefaultTextColor(Qt::white);
     setFontSizeAndCenter(m_txt_time, box_6);
 
-    int button_size = (int) ((SCREEN_WIDTH - 2.0 * SIDEBANDS_WIDTH - 3.0 * MARGIN) / 7.0 - MARGIN);
+    int button_size = (int) ((m_screen_width - 2.0 * m_sidebands_width - 3.0 * MARGIN) / 7.0 - MARGIN);
 
     QGraphicsLinearLayout *lay_buttons = new QGraphicsLinearLayout(Qt::Horizontal);
 
@@ -202,7 +204,7 @@ TimerView::TimerView(Tournament *t)
     //qDebug() << buttons_item->boundingRect();
 
     scene->addItem(buttons_item);
-    buttons_item->setPos(SIDEBANDS_WIDTH, SCREEN_HEIGHT - button_size - 3.0 * MARGIN);
+    buttons_item->setPos(m_sidebands_width, m_screen_height - button_size - 3.0 * MARGIN);
 
     QObject::connect(pb_play, SIGNAL(clicked()), this, SLOT(playClicked()));
     QObject::connect(pb_prev, SIGNAL(clicked()), this, SLOT(prevClicked()));
@@ -212,12 +214,12 @@ TimerView::TimerView(Tournament *t)
     QObject::connect(pb_minimize, SIGNAL(clicked()), this, SLOT(showMinimized()));
     QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
 
-    box_name        = QRectF(SIDEBANDS_WIDTH + MARGIN, 0.0, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), 85.0);
-    box_timer       = QRectF(SIDEBANDS_WIDTH + MARGIN, box_name.bottom() * 0.8, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), SCREEN_HEIGHT / 3.0);
-    box_blinds      = QRectF(SIDEBANDS_WIDTH + MARGIN, box_timer.bottom() * 0.9, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 4.0);
-    box_ante        = QRectF(SIDEBANDS_WIDTH + MARGIN, box_blinds.top() + box_blinds.height() * 0.85, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 2.5);
-    box_next_blinds = QRectF(SIDEBANDS_WIDTH + MARGIN, box_ante.bottom(), SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 2.0);
-    box_next_ante   = QRectF(SIDEBANDS_WIDTH + MARGIN, box_next_blinds.top() + box_next_blinds.height() * 0.85, SCREEN_WIDTH - 2.0 * (SIDEBANDS_WIDTH + MARGIN), (SCREEN_HEIGHT - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 1.5);
+    box_name        = QRectF(m_sidebands_width + MARGIN, 0.0, m_screen_width - 2.0 * (m_sidebands_width + MARGIN), 85.0);
+    box_timer       = QRectF(m_sidebands_width + MARGIN, box_name.bottom() * 0.8, m_screen_width - 2.0 * (m_sidebands_width + MARGIN), m_screen_height / 3.0);
+    box_blinds      = QRectF(m_sidebands_width + MARGIN, box_timer.bottom() * 0.9, m_screen_width - 2.0 * (m_sidebands_width + MARGIN), (m_screen_height - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 4.0);
+    box_ante        = QRectF(m_sidebands_width + MARGIN, box_blinds.top() + box_blinds.height() * 0.85, m_screen_width - 2.0 * (m_sidebands_width + MARGIN), (m_screen_height - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 2.5);
+    box_next_blinds = QRectF(m_sidebands_width + MARGIN, box_ante.bottom(), m_screen_width - 2.0 * (m_sidebands_width + MARGIN), (m_screen_height - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 2.0);
+    box_next_ante   = QRectF(m_sidebands_width + MARGIN, box_next_blinds.top() + box_next_blinds.height() * 0.85, m_screen_width - 2.0 * (m_sidebands_width + MARGIN), (m_screen_height - button_size - 3.0 * MARGIN - box_timer.bottom() * 0.9) / 9.0 * 1.5);
 
     m_txt_name = scene->addText(m_tournament->name(), QFont(FONT_NAME));
     m_txt_name->setDefaultTextColor(Qt::white);
@@ -246,7 +248,7 @@ TimerView::TimerView(Tournament *t)
     updateLevels();
 
     this->setScene(scene);
-    this->setSceneRect(0.0, 0.0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    this->setSceneRect(0.0, 0.0, m_screen_width, m_screen_height);
     this->setWindowTitle("PokerTimer - Torneo");
 
     QTimer *time_timer = new QTimer(this);

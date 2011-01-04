@@ -169,7 +169,7 @@ void MainWindow::on_actionNew_triggered()
     if(m_tournament)
     {
         if(QMessageBox::question(this, tr("Nuovo Torneo"), tr("Vuoi salvare il torneo attuale prima di cancellarlo?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
-            on_actionSaveAs_triggered();
+            on_actionSave_triggered();
         }
 
         delete m_tournament;
@@ -193,14 +193,14 @@ void MainWindow::on_actionOpen_triggered()
         m_tournament = 0;
     }
 
-    QString fn = QFileDialog::getOpenFileName(this, tr("Apri"), QDir::homePath(), tr("Poker Tournament (*.pkt)"));
-    if(fn.isNull())
+    QString filename = QFileDialog::getOpenFileName(this, tr("Apri"), QDir::homePath(), tr("Poker Tournament (*.pkt)"));
+    if(filename.isNull() || filename.isEmpty())
     {
         on_actionNew_triggered();
         return;
     }
 
-    QFile file(fn);
+    QFile file(filename);
     if(! (file.exists() && file.open(QIODevice::ReadOnly)))
     {
         QMessageBox::warning(this, tr("Apri"), tr("Impossibile aprire il file."), QMessageBox::Ok);
@@ -218,14 +218,6 @@ void MainWindow::on_actionOpen_triggered()
         return;
     }
 
-    QDomNodeList nodelist = doc.elementsByTagName("poker-tournament-manager");
-    if(nodelist.size() != 1 || nodelist.at(0).attributes().namedItem("swversion").nodeValue() != PTM_VERSION || nodelist.at(0).attributes().namedItem("xmlversion").nodeValue() != PTM_XML_VERSION)
-    {
-        QMessageBox::warning(this, tr("Apri"), tr("Errore nella versione del file."), QMessageBox::Ok);
-        on_actionNew_triggered();
-        return;
-    }
-
     m_tournament = new Tournament;
     if(! m_tournament->fromXml(doc))
     {
@@ -238,7 +230,7 @@ void MainWindow::on_actionOpen_triggered()
         return;
     }
 
-    m_filename = fn;
+    m_filename = filename;
     updateGraphics();
     return;
 
@@ -283,10 +275,6 @@ void MainWindow::on_actionSave_triggered()
     }
 
     QDomDocument doc(PTM_XML_DOCTYPE);
-    QDomElement el_sw = doc.createElement("poker-tournament-manager");
-    el_sw.setAttribute("swversion", PTM_VERSION);
-    el_sw.setAttribute("xmlversion", PTM_XML_VERSION);
-    doc.appendChild(el_sw);
     m_tournament->toXml(doc);
 
     QFile file(m_filename);

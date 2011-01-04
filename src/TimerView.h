@@ -37,6 +37,10 @@ class TimerView : public QGraphicsView
         bool m_paused;
         int m_current_level;
 
+        double m_screen_width;
+        double m_screen_height;
+        double m_sidebands_width;
+
         QTime m_level_time;
         QTime m_play_time;
 

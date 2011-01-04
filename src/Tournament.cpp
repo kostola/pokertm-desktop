@@ -16,6 +16,8 @@
 
 #include <QDebug>
 
+#include "Global.h"
+
 #define MIN_GAMELEVEL_MINUTES  2
 #define MIN_PAUSELEVEL_MINUTES 1
 
@@ -224,6 +226,12 @@ bool Tournament::fromXml(const QDomDocument &xmldoc)
     if(node_tournament.isNull())
     {
         qDebug() << "Tournament::fromXml [1]";
+        return false;
+    }
+
+    if(node_tournament.attributes().namedItem("xmlversion").nodeValue() != PTM_XML_VERSION)
+    {
+        qDebug() << "Tournament::fromXml [1.1]";
         return false;
     }
 
@@ -440,6 +448,7 @@ void Tournament::setName(const QString& n)
 void Tournament::setTotalPlayers(int tp)
 {
     m_total_players = tp;
+    m_current_players = m_total_players;
 }
 
 void Tournament::setRebuyChips(int c)
@@ -468,6 +477,8 @@ void Tournament::toXml(QDomDocument &xmldoc)
     el_tournament.setTagName("tournament");
     el_tournament.setAttribute("name", name());
     el_tournament.setAttribute("players", totalPlayers());
+    el_tournament.setAttribute("swversion", PTM_VERSION);
+    el_tournament.setAttribute("xmlversion", PTM_XML_VERSION);
     xmldoc.appendChild(el_tournament);
 
     QDomElement el_levels = xmldoc.createElement("levels");
