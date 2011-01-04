@@ -74,6 +74,7 @@ class Tournament : public QObject
         Tournament();
         ~Tournament();
 
+        // configuration methods
         Level* addLevel(int pos = -1);
         int countLevels();
         Level* level(int number);
@@ -81,27 +82,36 @@ class Tournament : public QObject
         void moveLevelUp(int pos);
         void removeLevel(int pos = -1);
 
-        int chipsEach();
-        void setChipsEach(int c);
-
-        int currentPlayers();
-        void setCurrentPlayers(int cp);
+        int initialStack();
+        void setInitialStack(int c);
 
         QString name();
         void setName(const QString& n);
 
-        int rebuyChips();
-        void setRebuyChips(int c);
+        int rebuyStack();
+        void setRebuyStack(int c);
 
         int totalPlayers();
         void setTotalPlayers(int tp);
 
+        bool isStarted();
+        void start();
+
+        // play methods
+        Level* currentLevel();
+        int currentLevelNumber();
+        void goToNextLevel();
+        void goToPrevLevel();
+        Level* nextLevel();
+
         int averageStack();
+        int currentPlayers();
         int totalChips();
 
         void playerOut();
-        void rebuy(int currentLevel);
+        void rebuy();
 
+        // other methods
         QString toString();
 
         bool fromXml(const QDomDocument& xmldoc);
@@ -110,11 +120,15 @@ class Tournament : public QObject
     private:
         QString m_name;
         QList<Level*> m_levels;
-        int m_chips_each;
-        int m_current_players;
-        int m_rebuy_chips;
-        int m_rebuys;
+        int m_stack_initial;
+        int m_stack_rebuy;
         int m_total_players;
+
+        bool m_is_started;
+        int m_current_level;
+        int m_current_players;
+        int m_rebuys;
+
 };
 
 #endif // TOURNAMENT_H

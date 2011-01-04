@@ -31,15 +31,27 @@ class TimerView : public QGraphicsView
 
     public:
         TimerView(Tournament *t);
+        ~TimerView();
 
     private:
+        enum GraphicsParts
+        {
+            AverageStackGraphics = 0x01,
+            CurrentTimeGraphics  = 0x02,
+            LevelsGraphics       = 0x04,
+            PlayersGraphics      = 0x08,
+            PlayTimesGraphics    = 0x10,
+            TotalChipsGraphics   = 0x20,
+            AllGraphics          = 0xFF
+        };
+
         void goToNextLevel();
         void goToPrevLevel();
+        void updateGraphics(int what = AllGraphics);
 
         Tournament *m_tournament;
 
         bool m_paused;
-        int m_current_level;
 
         double m_screen_width;
         double m_screen_height;
@@ -91,12 +103,7 @@ class TimerView : public QGraphicsView
         void handlePrevClicked();
         void handleRebuyClicked();
         void tournamentTimerTimeout();
-        void updateAverageStack();
         void updateCurrentTime();
-        void updateLevels();
-        void updatePlayers();
-        void updatePlayTimes();
-        void updateTotalChips();
 };
 
 #endif // TIMERVIEW_H

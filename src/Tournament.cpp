@@ -176,11 +176,15 @@ Level::LevelType Level::type()
 
 Tournament::Tournament()
 {
-    m_chips_each      = 0;
-    m_current_players = 0;
-    m_rebuy_chips     = 0;
-    m_rebuys          = 0;
+    m_stack_initial   = 0;
+    m_stack_rebuy     = 0;
     m_total_players   = 0;
+
+    m_is_started = false;
+
+    m_current_level   = 0;
+    m_current_players = 0;
+    m_rebuys          = 0;
 }
 
 Tournament::~Tournament()
@@ -192,6 +196,9 @@ Tournament::~Tournament()
 
 Level* Tournament::addLevel(int pos)
 {
+    if(isStarted())
+        return 0;
+
     Level* l = new Level;
 
     if(pos < 0 || pos >= m_levels.size())
@@ -204,21 +211,51 @@ Level* Tournament::addLevel(int pos)
 
 int Tournament::averageStack()
 {
+    if(! isStarted())
+        return 0;
+
     return totalChips() / m_current_players;
 }
 
-int Tournament::chipsEach()
+int Tournament::initialStack()
 {
-    return m_chips_each;
+    return m_stack_initial;
+}
+
+int Tournament::countLevels()
+{
+    return m_levels.size();
+}
+
+Level* Tournament::currentLevel()
+{
+    if(! isStarted())
+        return 0;
+
+    return m_levels.at(m_current_level);
+}
+
+int Tournament::currentLevelNumber()
+{
+    if(! isStarted())
+        return -1;
+
+    return m_current_level;
 }
 
 int Tournament::currentPlayers()
 {
+    if(! isStarted())
+        return -1;
+
     return m_current_players;
 }
 
 bool Tournament::fromXml(const QDomDocument &xmldoc)
 {
+    if(isStarted())
+        return false;
+
     bool ok;
 
     QDomNode node_tournament = xmldoc.namedItem("tournament");
@@ -331,35 +368,52 @@ bool Tournament::fromXml(const QDomDocument &xmldoc)
         qDebug() << "Tournament::fromXml [13]";
         return false;
     }
-    setChipsEach(stack_initial);
+    setInitialStack(stack_initial);
     int stack_rebuy = node_stack.attributes().namedItem("rebuy").nodeValue().toInt(&ok);
     if(! ok)
     {
         qDebug() << "Tournament::fromXml [14]";
         return false;
     }
-    setRebuyChips(stack_rebuy);
+    setRebuyStack(stack_rebuy);
 
     return true;
 }
 
+void Tournament::goToNextLevel()
+{
+    if(! isStarted())
+        return;
+
+    m_current_level = qMin(m_current_level + 1, m_levels.size() - 1);
+}
+
+void Tournament::goToPrevLevel()
+{
+    if(! isStarted())
+        return;
+
+    m_current_level = qMax(m_current_level - 1, 0);
+}
+
+bool Tournament::isStarted()
+{
+    return m_is_started;
+}
+
 Level* Tournament::level(int number)
 {
-    //qDebug() << this->toString();
-
     if(number < 0 || countLevels() == 0)
         return 0;
 
     return m_levels.at(qMin(number, countLevels() - 1));
 }
 
-int Tournament::countLevels()
-{
-    return m_levels.size();
-}
-
 void Tournament::moveLevelDown(int pos)
 {
+    if(isStarted())
+        return;
+
     if(pos < 0 || pos >= m_levels.size() - 1)
         return;
 
@@ -368,6 +422,9 @@ void Tournament::moveLevelDown(int pos)
 
 void Tournament::moveLevelUp(int pos)
 {
+    if(isStarted())
+        return;
+
     if(pos <= 0 || pos > m_levels.size() - 1)
         return;
 
@@ -379,13 +436,47 @@ QString Tournament::name()
     return m_name;
 }
 
-int Tournament::rebuyChips()
+Level* Tournament::nextLevel()
 {
-    return m_rebuy_chips;
+    if(! isStarted())
+        return 0;
+
+    return m_levels.at(qMin(m_current_level + 1, m_levels.size() - 1));
+}
+
+void Tournament::playerOut()
+{
+    if(! isStarted())
+        return;
+
+    if(currentLevel()->type() == Level::PauseLevel || m_current_players <= 1)
+        return;
+
+    m_current_players--;
+}
+
+void Tournament::rebuy()
+{
+    if(! isStarted())
+        return;
+
+    if(currentLevel()->type() == Level::PauseLevel || !currentLevel()->isRebuyEnabled() || m_current_players == m_total_players)
+        return;
+
+    m_current_players++;
+    m_rebuys++;
+}
+
+int Tournament::rebuyStack()
+{
+    return m_stack_rebuy;
 }
 
 void Tournament::removeLevel(int pos)
 {
+    if(isStarted())
+        return;
+
     if(pos < 0 || pos >= m_levels.size() - 1)
     {
         Level *l = m_levels.takeLast();
@@ -398,55 +489,46 @@ void Tournament::removeLevel(int pos)
     }
 }
 
-int Tournament::totalChips()
-{
-    return m_total_players * m_chips_each + m_rebuys * m_rebuy_chips;
-}
 
-int Tournament::totalPlayers()
+void Tournament::setInitialStack(int c)
 {
-    return m_total_players;
-}
-
-void Tournament::playerOut()
-{
-    if(m_current_players > 1)
-        m_current_players--;
-}
-
-void Tournament::rebuy(int currentLevel)
-{
-    if(m_levels.size() >= currentLevel || m_levels.at(currentLevel)->type() == Level::PauseLevel || !m_levels.at(currentLevel)->isRebuyEnabled() || m_current_players == m_total_players)
+    if(isStarted())
         return;
 
-    m_current_players++;
-    m_rebuys++;
-}
-
-void Tournament::setChipsEach(int c)
-{
-    m_chips_each = c;
-}
-
-void Tournament::setCurrentPlayers(int cp)
-{
-    m_current_players = cp;
+    m_stack_initial = c;
 }
 
 void Tournament::setName(const QString& n)
 {
+    if(isStarted())
+        return;
+
     m_name = n;
 }
 
 void Tournament::setTotalPlayers(int tp)
 {
+    if(isStarted())
+        return;
+
     m_total_players = tp;
-    m_current_players = m_total_players;
 }
 
-void Tournament::setRebuyChips(int c)
+void Tournament::setRebuyStack(int c)
 {
-    m_rebuy_chips = c;
+    if(isStarted())
+        return;
+
+    m_stack_rebuy = c;
+}
+
+void Tournament::start()
+{
+    if(isStarted())
+        return;
+
+    m_is_started = true;
+    m_current_players = m_total_players;
 }
 
 QString Tournament::toString()
@@ -457,6 +539,16 @@ QString Tournament::toString()
         str.append(QString("%1 ").arg(l->toString()));
     }
     return str;
+}
+
+int Tournament::totalChips()
+{
+    return m_total_players * m_stack_initial + m_rebuys * m_stack_rebuy;
+}
+
+int Tournament::totalPlayers()
+{
+    return m_total_players;
 }
 
 void Tournament::toXml(QDomDocument &xmldoc)
@@ -500,7 +592,7 @@ void Tournament::toXml(QDomDocument &xmldoc)
     }
 
     QDomElement el_stack = xmldoc.createElement("stack");
-    el_stack.setAttribute("initial", chipsEach());
-    el_stack.setAttribute("rebuy", rebuyChips());
+    el_stack.setAttribute("initial", initialStack());
+    el_stack.setAttribute("rebuy", rebuyStack());
     el_tournament.appendChild(el_stack);
 }

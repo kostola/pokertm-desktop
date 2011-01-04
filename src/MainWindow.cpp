@@ -116,8 +116,8 @@ void MainWindow::handleChipsEdit()
     if(! m_tournament)
         return;
 
-    m_tournament->setChipsEach(ui->spinChips->value());
-    qDebug() << "Tournament Chips Each:" << m_tournament->chipsEach();
+    m_tournament->setInitialStack(ui->spinChips->value());
+    qDebug() << "Tournament Chips Each:" << m_tournament->initialStack();
     validateStart();
 }
 
@@ -146,8 +146,8 @@ void MainWindow::handleRebuyChipsEdit()
     if(! m_tournament)
         return;
 
-    m_tournament->setRebuyChips(ui->spinRebuyChips->value());
-    qDebug() << "Tournament Rebuy Chips:" << m_tournament->rebuyChips();
+    m_tournament->setRebuyStack(ui->spinRebuyChips->value());
+    qDebug() << "Tournament Rebuy Chips:" << m_tournament->rebuyStack();
     validateStart();
 }
 
@@ -393,9 +393,9 @@ void MainWindow::on_startButton_clicked()
 void MainWindow::updateGraphics(bool update_levels)
 {
     ui->tourneyName->setText(m_tournament->name());
-    ui->spinChips->setValue(m_tournament->chipsEach());
+    ui->spinChips->setValue(m_tournament->initialStack());
     ui->spinPlayers->setValue(m_tournament->totalPlayers());
-    ui->spinRebuyChips->setValue(m_tournament->rebuyChips());
+    ui->spinRebuyChips->setValue(m_tournament->rebuyStack());
 //    ui->spinRebuyLev->setValue(m_tournament->rebuyMaxLevel());
 
     ui->tableLevels->clearContents();
@@ -457,8 +457,13 @@ void MainWindow::validateStart()
 
 void MainWindow::startTournament()
 {
+    m_tournament->start();
+
     TimerView *tv = new TimerView(m_tournament);
     tv->setAttribute(Qt::WA_DeleteOnClose);
     tv->setWindowState(Qt::WindowFullScreen);
     tv->show();
+
+    m_tournament = 0;
+    on_actionNew_triggered();
 }

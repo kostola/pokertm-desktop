@@ -1,10 +1,10 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#define PTM_VERSION "0.1.1"
+#define PTM_VERSION "0.2.0"
 #define PTM_VERSION_MAJOR 0
-#define PTM_VERSION_MINOR 1
-#define PTM_VERSION_PATCH 1
+#define PTM_VERSION_MINOR 2
+#define PTM_VERSION_PATCH 0
 
 #define PTM_XML_VERSION "0.1"
 #define PTM_XML_VERSION_MAJOR 0

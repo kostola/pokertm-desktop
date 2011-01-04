@@ -66,7 +66,6 @@ void setFontSizeAndCenter(QGraphicsTextItem *item, const QRectF &rect)
 TimerView::TimerView(Tournament *t)
     : m_tournament(t)
     , m_paused(true)
-    , m_current_level(0)
 {
     // calculating dimensions
     m_screen_width = ((double)QApplication::desktop()->geometry().width()) - 4.0;
@@ -87,7 +86,7 @@ TimerView::TimerView(Tournament *t)
     scene->addLine(m_screen_width - m_sidebands_width, m_screen_height / 3.0 * 2.0, m_screen_width, m_screen_height / 3.0 * 2.0, pen_white);
 
     // calculating fixed texts point size
-    int fixed_txt_size = qCeil(m_screen_width / 50.0) + 3;
+    int fixed_txt_size = qCeil(m_screen_width / 50.0) + 2;
 
     // creating fixed texts
     QGraphicsTextItem *txt_1 = scene->addText(tr("Giocatori"),      QFont(FONT_NAME, fixed_txt_size));
@@ -128,15 +127,14 @@ TimerView::TimerView(Tournament *t)
     // creating variable texts for side boxes
     m_txt_players = scene->addText("", QFont(FONT_NAME));
     m_txt_players->setDefaultTextColor(Qt::white);
-    updatePlayers();
 
     m_txt_avgstack = scene->addText("", QFont(FONT_NAME));
     m_txt_avgstack->setDefaultTextColor(Qt::white);
-    updateAverageStack();
 
     m_txt_totchips = scene->addText("", QFont(FONT_NAME));
     m_txt_totchips->setDefaultTextColor(Qt::white);
-    updateTotalChips();
+
+    updateGraphics(AverageStackGraphics | PlayersGraphics | TotalChipsGraphics);
 
     m_txt_starttime = scene->addText("00:00:00", QFont(FONT_NAME));
     m_txt_starttime->setDefaultTextColor(Qt::white);
@@ -265,7 +263,7 @@ TimerView::TimerView(Tournament *t)
     m_txt_timer->setDefaultTextColor(Qt::red);
     setFontSizeAndCenter(m_txt_timer, box_timer);
 
-    m_level_time = m_tournament->level(m_current_level)->time();
+    m_level_time = m_tournament->currentLevel()->time();
     m_play_time = QTime(0,0,0,0);
     m_txt_timer->setPlainText(m_level_time.toString("mm:ss"));
 
@@ -276,16 +274,17 @@ TimerView::TimerView(Tournament *t)
     m_txt_ante->setDefaultTextColor(Qt::white);
 
     m_txt_next_blinds = scene->addText("400 / 800", QFont(FONT_NAME));
-    m_txt_next_blinds->setDefaultTextColor(Qt::darkGray);
+    m_txt_next_blinds->setDefaultTextColor(QColor(0x60,0x60,0x60));
 
     m_txt_next_ante = scene->addText("Ante: 200", QFont(FONT_NAME));
-    m_txt_next_ante->setDefaultTextColor(Qt::darkGray);
+    m_txt_next_ante->setDefaultTextColor(QColor(0x60,0x60,0x60));
 
-    updateLevels();
+    updateGraphics(LevelsGraphics);
 
     // setting window properties
     this->setScene(scene);
     this->setSceneRect(0.0, 0.0, m_screen_width, m_screen_height);
+    this->setWindowIcon(QIcon(":/data/icon.svg"));
     this->setWindowTitle("Poker Tournament Manager - Torneo");
 
     // creating and connecting timers
@@ -297,22 +296,23 @@ TimerView::TimerView(Tournament *t)
     QObject::connect(m_tournament_timer, SIGNAL(timeout()), this, SLOT(tournamentTimerTimeout()));
 }
 
+TimerView::~TimerView()
+{
+    delete m_tournament;
+}
+
 void TimerView::goToNextLevel()
 {
-    m_current_level = qMin(m_current_level + 1, m_tournament->countLevels() - 1);
-    updateLevels();
-
-    m_level_time = m_tournament->level(m_current_level)->time();
-    updatePlayTimes();
+    m_tournament->goToNextLevel();
+    m_level_time = m_tournament->currentLevel()->time();
+    updateGraphics(LevelsGraphics | PlayTimesGraphics);
 }
 
 void TimerView::goToPrevLevel()
 {
-    m_current_level = qMax(m_current_level - 1, 0);
-    updateLevels();
-
-    m_level_time = m_tournament->level(m_current_level)->time();
-    updatePlayTimes();
+    m_tournament->goToPrevLevel();
+    m_level_time = m_tournament->currentLevel()->time();
+    updateGraphics(LevelsGraphics | PlayTimesGraphics);
 }
 
 void TimerView::handleNextClicked()
@@ -351,16 +351,11 @@ void TimerView::handlePlayClicked()
 void TimerView::handlePlayerOutClicked()
 {
     m_tournament->playerOut();
-    updatePlayers();
-    updateAverageStack();
-    updateTotalChips();
+    updateGraphics(AverageStackGraphics | PlayersGraphics | TotalChipsGraphics);
 }
 
 void TimerView::handlePrevClicked()
 {
-    if(m_current_level == 0)
-        return;
-
     goToPrevLevel();
 
     if(! m_paused)
@@ -369,100 +364,113 @@ void TimerView::handlePrevClicked()
 
 void TimerView::handleRebuyClicked()
 {
-    m_tournament->rebuy(m_current_level);
-    updatePlayers();
-    updateAverageStack();
-    updateTotalChips();
+    if(! m_tournament->currentLevel()->isRebuyEnabled())
+        return;
+
+    m_tournament->rebuy();
+    updateGraphics(AverageStackGraphics | PlayersGraphics | TotalChipsGraphics);
 }
 
 void TimerView::tournamentTimerTimeout()
 {
     m_level_time = m_level_time.addSecs(-1);
 
-    if(m_level_time.toString("mm:ss") == "00:00") {
+    if(m_level_time.minute() == 0 && m_level_time.second() == 0)
+    {
         // cambio livello
-        m_current_level++;
-        updateLevels();
-        m_level_time = m_tournament->level(m_current_level)->time();
         qDebug() << "PLAY GONG";
         PLAYSOUND("sounds/gong.wav");
+        goToNextLevel();
     }
-    else if(m_level_time.toString("mm:ss") == "01:00") {
+    else if(m_level_time.minute() == 1 && m_level_time.second() == 0)
+    {
         qDebug() << "PLAY SCREAM";
         PLAYSOUND("sounds/scream.wav");
     }
-    else if(m_level_time.toString("mm:ss") == "00:01" || m_level_time.toString("mm:ss") == "00:02" || m_level_time.toString("mm:ss") == "00:03") {
+    else if(m_level_time.minute() == 0 && m_level_time.second() >= 1 && m_level_time.second() <= 3)
+    {
         qDebug() << "PLAY TICK";
         PLAYSOUND("sounds/tick.wav");
     }
 
     m_play_time = m_play_time.addSecs(1);
-    updatePlayTimes();
-    //qDebug() << m_level_time << m_play_time;
-}
-
-void TimerView::updateAverageStack()
-{
-    m_txt_avgstack->setPlainText(addNumberPoints(QString::number(m_tournament->averageStack())));
-    setFontSizeAndCenter(m_txt_avgstack, box_2);
+    updateGraphics(PlayTimesGraphics);
 }
 
 void TimerView::updateCurrentTime()
 {
-    m_txt_time->setPlainText(QTime::currentTime().toString("HH:mm:ss"));
+    updateGraphics(CurrentTimeGraphics);
 }
 
-void TimerView::updateLevels()
+void TimerView::updateGraphics(int what)
 {
-    if(m_tournament->level(m_current_level)->type() == Level::GameLevel)
+    if(what & AverageStackGraphics)
     {
-        m_txt_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->level(m_current_level)->smallBlind()).arg(m_tournament->level(m_current_level)->bigBlind()));
-        setFontSizeAndCenter(m_txt_blinds, box_blinds);
-
-        m_txt_ante->setPlainText(QString("Ante: %1").arg(m_tournament->level(m_current_level)->ante()));
-        setFontSizeAndCenter(m_txt_ante, box_ante);
-    }
-    else
-    {
-        m_txt_blinds->setPlainText(tr("PAUSA"));
-        setFontSizeAndCenter(m_txt_blinds, box_blinds);
-
-        m_txt_ante->setPlainText("RELAX");
-        setFontSizeAndCenter(m_txt_ante, box_ante);
+        m_txt_avgstack->setPlainText(addNumberPoints(QString::number(m_tournament->averageStack())));
+        setFontSizeAndCenter(m_txt_avgstack, box_2);
     }
 
-    if(m_tournament->level(m_current_level + 1)->type() == Level::GameLevel)
+    if(what & CurrentTimeGraphics)
     {
-        m_txt_next_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->level(m_current_level + 1)->smallBlind()).arg(m_tournament->level(m_current_level + 1)->bigBlind()));
-        setFontSizeAndCenter(m_txt_next_blinds, box_next_blinds);
-
-        m_txt_next_ante->setPlainText(QString("Ante: %1").arg(m_tournament->level(m_current_level + 1)->ante()));
-        setFontSizeAndCenter(m_txt_next_ante, box_next_ante);
+        m_txt_time->setPlainText(QTime::currentTime().toString("HH:mm:ss"));
     }
-    else
+
+    if(what & LevelsGraphics)
     {
-        m_txt_next_blinds->setPlainText(tr("PAUSA"));
-        setFontSizeAndCenter(m_txt_next_blinds, box_next_blinds);
+        if(m_tournament->currentLevel()->type() == Level::GameLevel)
+        {
+            m_txt_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->currentLevel()->smallBlind()).arg(m_tournament->currentLevel()->bigBlind()));
+            setFontSizeAndCenter(m_txt_blinds, box_blinds);
 
-        m_txt_next_ante->setPlainText("RELAX");
-        setFontSizeAndCenter(m_txt_next_ante, box_next_ante);
+            m_txt_ante->setPlainText(QString("Ante: %1").arg(m_tournament->currentLevel()->ante()));
+            setFontSizeAndCenter(m_txt_ante, box_ante);
+
+            m_pb_rebuy->setIcon(QIcon(QString(":/data/icon_rebuy%1.svg").arg(m_tournament->currentLevel()->isRebuyEnabled() ? "" : "_locked")));
+        }
+        else
+        {
+            m_txt_blinds->setPlainText(tr("PAUSA"));
+            setFontSizeAndCenter(m_txt_blinds, box_blinds);
+
+            m_txt_ante->setPlainText("RELAX");
+            setFontSizeAndCenter(m_txt_ante, box_ante);
+
+            m_pb_rebuy->setIcon(QIcon(":/data/icon_rebuy_locked.svg"));
+        }
+
+        if(m_tournament->nextLevel()->type() == Level::GameLevel)
+        {
+            m_txt_next_blinds->setPlainText(QString("%1 / %2").arg(m_tournament->nextLevel()->smallBlind()).arg(m_tournament->nextLevel()->bigBlind()));
+            setFontSizeAndCenter(m_txt_next_blinds, box_next_blinds);
+
+            m_txt_next_ante->setPlainText(QString("Ante: %1").arg(m_tournament->nextLevel()->ante()));
+            setFontSizeAndCenter(m_txt_next_ante, box_next_ante);
+        }
+        else
+        {
+            m_txt_next_blinds->setPlainText(tr("PAUSA"));
+            setFontSizeAndCenter(m_txt_next_blinds, box_next_blinds);
+
+            m_txt_next_ante->setPlainText("RELAX");
+            setFontSizeAndCenter(m_txt_next_ante, box_next_ante);
+        }
     }
-}
 
-void TimerView::updatePlayers()
-{
-    m_txt_players->setPlainText(QString("%1/%2").arg(m_tournament->currentPlayers()).arg(m_tournament->totalPlayers()));
-    setFontSizeAndCenter(m_txt_players, box_1);
-}
+    if(what & PlayersGraphics)
+    {
+        m_txt_players->setPlainText(QString("%1/%2").arg(m_tournament->currentPlayers()).arg(m_tournament->totalPlayers()));
+        setFontSizeAndCenter(m_txt_players, box_1);
+    }
 
-void TimerView::updatePlayTimes()
-{
-    m_txt_timer->setPlainText(m_level_time.toString("mm:ss"));
-    m_txt_playtime->setPlainText(m_play_time.toString("HH:mm:ss"));
-}
+    if(what & PlayTimesGraphics)
+    {
+        m_txt_timer->setPlainText(m_level_time.toString("mm:ss"));
+        m_txt_playtime->setPlainText(m_play_time.toString("HH:mm:ss"));
+    }
 
-void TimerView::updateTotalChips()
-{
-    m_txt_totchips->setPlainText(addNumberPoints(QString::number(m_tournament->totalChips())));
-    setFontSizeAndCenter(m_txt_totchips, box_3);
+    if(what & TotalChipsGraphics)
+    {
+        m_txt_totchips->setPlainText(addNumberPoints(QString::number(m_tournament->totalChips())));
+        setFontSizeAndCenter(m_txt_totchips, box_3);
+    }
 }
